@@ -5,7 +5,7 @@ import { CONTACT, CONTATTO } from "@/app/content";
 import { T, TBlock } from "../T";
 import { BEAT, PLAY, drawAcross, rise, riseHeavy } from "./motion";
 
-const SPAN = BEAT * 5 + PLAY;
+const SPAN = BEAT * 4 + PLAY;
 const LANGS = ["it", "en"] as const;
 
 /**
@@ -15,7 +15,7 @@ const LANGS = ["it", "en"] as const;
 export default function Contatto({ index }: { index: number }) {
   return (
     <Section index={index} snap end={SNAP.normal + SPAN}>
-      <div className="relative z-10 flex min-h-[100dvh] flex-col justify-between px-5 pb-8 pt-24 md:px-8 md:pb-10">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col px-5 pb-8 pt-24 md:px-8 md:pb-10">
         <Section start={SNAP.normal}>
           <div className="flex flex-1 flex-col justify-center gap-[4svh]">
             <SDiv budget={PLAY} anim={rise} className="t-meta text-viola">
@@ -93,10 +93,6 @@ export default function Contatto({ index }: { index: number }) {
               */}
             </SDiv>
           </div>
-
-          <SDiv start={BEAT * 5} budget={PLAY} anim={rise} className="t-meta pt-[3svh] text-bone/45">
-            <T c={CONTATTO.colophon} />
-          </SDiv>
         </Section>
       </div>
     </Section>

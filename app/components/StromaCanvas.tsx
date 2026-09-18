@@ -112,6 +112,35 @@ const PULSE_GLOW = 0.12;
 const JUMP_MS0 = 250;
 const JUMP_MS_PER_ROW = 130;
 const JUMP_MS_MAX = 1400;
+/**
+ * The governor. Stroking costs by the backing-store pixel, and the devices that
+ * cannot keep up are not ones anybody can profile from a desk — so the canvas
+ * times its own frames and, when they run long, steps its resolution DOWN a
+ * tier. `QUALITY` multiplies the dpr `resize` would otherwise pick, floored at
+ * `DPR_FLOOR`; MIN_DEVICE_W is in device pixels, so the hairlines survive every
+ * tier and the tissue only gets a little softer.
+ *
+ * The floor is 1 — one device pixel per CSS pixel — and that is a finding, not
+ * caution. Measured on a desktop GPU, a quarter of the pixels bought 3% of the
+ * frame: there the cost is the geometry, and dropping under 1 would blur the
+ * tissue for nothing. So this only ever acts on hi-dpi screens, which is to say
+ * phones — whose GPUs this could NOT be measured on, and where the cost may
+ * well be by the pixel — and where 2 → 1.2 is hard to see on the glass.
+ *
+ * It never steps back up. A device slow enough to trip this once would trip it
+ * again, and each change reallocates the backing store — an oscillation would
+ * be its own stutter. A display capped at 30Hz trips it as well; a softer
+ * background is all that costs.
+ *
+ * Judged on PAINTED frames only (an idle frame says nothing about the canvas),
+ * on a smoothed interval over `SLOW_MS` for `SLOW_FRAMES` frames running, and
+ * not before `WARMUP_MS` — the page's own load is slow on every device.
+ */
+const QUALITY = [1, 0.75, 0.6];
+const DPR_FLOOR = 1;
+const SLOW_MS = 22;
+const SLOW_FRAMES = 30;
+const WARMUP_MS = 4000;
 /** Skip an edge whose projected size is under this many pixels. */
 const LOD_PX = 1.4;
 /** Mouse tilt limits (radians): ~7° of yaw, ~4° of pitch.
@@ -378,6 +407,11 @@ export default function StromaCanvas() {
   const jump = useRef<{ from: number; to: number; t: number; ms: number } | null>(null);
   /** Mouse position, normalised to [-1, 1] from the viewport centre. */
   const tilt = useRef({ x: 0, y: 0 });
+  /** The governor's state — see QUALITY. `ema` is the smoothed frame interval,
+   *  `slow` how many painted frames running it has sat over SLOW_MS. */
+  const gov = useRef({ tier: 0, ema: 0, slow: 0 });
+  /** `resize` lives in the mount effect; the frame callback reaches it here. */
+  const resizeRef = useRef<() => void>(() => {});
 
   // One smoother each, not a fresh closure per frame: smoothLerp is a factory.
   const ease = useRef(smoothLerp(CAM_HALF_LIFE));
@@ -404,6 +438,9 @@ export default function StromaCanvas() {
     /** Reused across frames — `start.slice()` was the only per-frame allocation
      *  in the draw path, and it ran twice per frame over the violet panel. */
     cursor: Int32Array;
+    /** By EDGE index, not by visible slot: 1 when the edge's box leaves the band
+     *  it is being drawn in, so its pieces are worth testing one by one. */
+    cut: Uint8Array;
     /** One edge's points, already projected to screen. Lets the growing tip be
      *  appended as an ordinary last vertex instead of a special case. */
     q: Float64Array;
@@ -420,9 +457,10 @@ export default function StromaCanvas() {
    *  last panel, so a beat in progress fades out instead of switching off. */
   const organ = useRef<Reveal | null>(null);
 
-  /** Paint the tissue under the given camera and palette. Sets its own transform;
-   *  any clip already installed by the caller survives, because a clip lives in
-   *  device space once set. */
+  /** Paint the tissue under the given camera and palette, inside the horizontal
+   *  band [bandTop, bandBot] of the screen (CSS px). The band only CULLS — the
+   *  caller installs the matching clip, which survives the transform set here
+   *  because a clip lives in device space once set. */
   const drawTree = (
     ctx: CanvasRenderingContext2D,
     org: Organism,
@@ -431,6 +469,8 @@ export default function StromaCanvas() {
     pu: Pulse | null,
     c: Camera,
     pal: Palette,
+    bandTop: number,
+    bandBot: number,
   ) => {
     const { w: W, h: H, dpr } = size.current;
     const sc = sort.current;
@@ -451,8 +491,11 @@ export default function StromaCanvas() {
     // whose box is just outside does not vanish while its stroke would show.
     const pad = (MAX_WIDTH / 2 + 2) / scale;
     const halfW = W / (2 * scale) + pad;
-    const up = (H * c.focus) / scale + pad;
-    const dn = (H * (1 - c.focus)) / scale + pad;
+    // The band, not the viewport: screen y = Hf + y1·scale, inverted. An edge
+    // wholly outside the band would be built, stroked and then thrown away by the
+    // caller's clip — and over the violet panel that was half of every frame.
+    const up = (p.Hf - bandTop) / scale + pad;
+    const dn = (bandBot - p.Hf) / scale + pad;
     const lod = LOD_PX / scale;
 
     // Interval arithmetic on the rotated box, rather than a global z padding.
@@ -467,7 +510,14 @@ export default function StromaCanvas() {
     const aPos = A > 0;
     const bPos = B > 0;
 
-    const { idx, bkt, order, count, start, cursor, q } = sc;
+    // The band WITHOUT the padding: an edge whose box sits inside it has nothing
+    // to trim, and is spared the per-piece tests below. That is every edge in the
+    // final pull-back, which is the most edges the page ever draws.
+    const inW = W / (2 * scale);
+    const inUp = (p.Hf - bandTop) / scale;
+    const inDn = (bandBot - p.Hf) / scale;
+
+    const { idx, bkt, order, count, start, cursor, cut, q } = sc;
     count.fill(0);
     let n = 0;
     for (let i = 0; i < org.edges.length; i++) {
@@ -500,6 +550,8 @@ export default function StromaCanvas() {
       // flicker as the mouse moves — a pop where there is none today.
       const l = lod * LOD_MUL[e.style];
       if (e.maxX - e.minX < l && e.maxY - e.minY < l) continue;
+
+      cut[i] = x1Lo < -inW || x1Hi > inW || y1Lo < -inUp || y1Hi > inDn ? 1 : 0;
 
       const b = e.band * STYLES + e.style;
       idx[n] = i;
@@ -535,6 +587,30 @@ export default function StromaCanvas() {
       q[nq++] = py(p, wx, wy, wz);
     };
 
+    // The second, finer cull: PIECES of an edge, in screen space. The box test
+    // above keeps any strand that touches the band, and a development strand is a
+    // whole row long — so with the panel on screen most strands touched both
+    // bands and were built and stroked whole in each, to be cut by the clip. A
+    // piece whose points all lie beyond the SAME side of the band (grown by the
+    // widest stroke) cannot put a pixel inside it, and neither can the round cap
+    // that now closes the run at the shared point, which is beyond that side too
+    // — so what is left inside the clip is the same picture.
+    const m = MAX_WIDTH / 2 + 2;
+    const xLo = -m;
+    const xHi = W + m;
+    const yLo = bandTop - m;
+    const yHi = bandBot + m;
+    const gone2 = (a: number, b: number) =>
+      (q[a] < xLo && q[b] < xLo) ||
+      (q[a] > xHi && q[b] > xHi) ||
+      (q[a + 1] < yLo && q[b + 1] < yLo) ||
+      (q[a + 1] > yHi && q[b + 1] > yHi);
+    const gone3 = (a: number, b: number, c: number) =>
+      (q[a] < xLo && q[b] < xLo && q[c] < xLo) ||
+      (q[a] > xHi && q[b] > xHi && q[c] > xHi) ||
+      (q[a + 1] < yLo && q[b + 1] < yLo && q[c + 1] < yLo) ||
+      (q[a + 1] > yHi && q[b + 1] > yHi && q[c + 1] > yHi);
+
     for (let b = 0; b < NBUCKET; b++) {
       const cnt = count[b];
       if (cnt === 0) continue;
@@ -544,6 +620,7 @@ export default function StromaCanvas() {
       const end = start[b] + cnt;
       for (let m = start[b]; m < end; m++) {
         const e = org.edges[order[m]];
+        const trim = cut[order[m]] === 1;
         const pts = e.pts;
         const nseg = pts.length / 3 - 1;
         const span = e.t1 - e.t0;
@@ -594,20 +671,55 @@ export default function StromaCanvas() {
         // lights.
         if (M < 1) continue;
 
-        ctx.moveTo(q[0], q[1]);
+        // `pen` is whether the path's current point already sits at the start of
+        // the piece about to be emitted; a culled piece lifts it.
+        let pen = false;
         if (smooth) {
           // Quadratics through the midpoints: G1 by construction, and Canvas
           // flattens them at DEVICE resolution, so they stay smooth at any zoom
           // instead of only at the one the sample count was chosen for. It also
           // retires the round-join blob sitting on every interior vertex.
+          //
+          // Piece i runs from mid(P[i-1], P[i]) — P[0] itself for the first — to
+          // mid(P[i], P[i+1]) with P[i] as its control, so it lies inside the
+          // hull of those three points, which is what `gone3` tests.
           for (let i = 1; i < M; i++) {
             const a = i * 2;
             const c = a + 2;
+            if (trim && gone3(a - 2, a, c)) {
+              pen = false;
+              continue;
+            }
+            if (!pen) {
+              if (i === 1) ctx.moveTo(q[0], q[1]);
+              else ctx.moveTo((q[a - 2] + q[a]) * 0.5, (q[a - 1] + q[a + 1]) * 0.5);
+              pen = true;
+            }
             ctx.quadraticCurveTo(q[a], q[a + 1], (q[a] + q[c]) * 0.5, (q[a + 1] + q[c + 1]) * 0.5);
           }
-          ctx.lineTo(q[M * 2], q[M * 2 + 1]);
+          // The closing straight, from the last midpoint (or P[0], when the edge
+          // is a single segment) to the tip.
+          const z = M * 2;
+          if (!(trim && gone2(z - 2, z))) {
+            if (!pen) {
+              if (M === 1) ctx.moveTo(q[0], q[1]);
+              else ctx.moveTo((q[z - 2] + q[z]) * 0.5, (q[z - 1] + q[z + 1]) * 0.5);
+            }
+            ctx.lineTo(q[z], q[z + 1]);
+          }
         } else {
-          for (let i = 1; i <= M; i++) ctx.lineTo(q[i * 2], q[i * 2 + 1]);
+          for (let i = 1; i <= M; i++) {
+            const a = i * 2;
+            if (trim && gone2(a - 2, a)) {
+              pen = false;
+              continue;
+            }
+            if (!pen) {
+              ctx.moveTo(q[a - 2], q[a - 1]);
+              pen = true;
+            }
+            ctx.lineTo(q[a], q[a + 1]);
+          }
         }
       }
       // Never below one device pixel, or the stroke breaks into a bead chain on
@@ -618,8 +730,8 @@ export default function StromaCanvas() {
     }
   };
 
-  /** One frame: the tissue, then the inverted copy inside the violet panel if
-   *  any of it is on screen. */
+  /** One frame: the tissue on carbon, and inverted inside the violet panel
+   *  wherever that is on screen — each drawn once, in its own band. */
   const paint = (
     org: Organism,
     s: number,
@@ -632,41 +744,52 @@ export default function StromaCanvas() {
     if (!ctx) return;
     const { w: W, h: H, dpr } = size.current;
 
-    // The violet panel's fill is OPAQUE, so whenever it covers the viewport every
-    // carbon stroke underneath is painted over and thrown away; skipping the pass
-    // is most of the frame. Measured on a wide viewport this never fires — the
-    // panel is `min-h-[100dvh]` and its content fits, so it is exactly one
-    // viewport tall and the engine parks it a couple of hundred pixels up. It
-    // earns its keep on narrow viewports, where the two columns wrap and the
-    // panel grows past the fold. The clear below goes with it: this is only safe
-    // when the panel truly covers everything, because there the opaque fillRect
-    // is what clears the surface.
-    const covers =
-      !!rect && rect.top <= 0 && rect.bottom >= H && rect.left <= 0 && rect.right >= W;
-
-    if (!covers) {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, W, H);
-      drawTree(ctx, org, s, cl, pu, c, ON_CARBON);
+    // The violet panel's fill is OPAQUE, so every carbon stroke under it is
+    // painted over and thrown away. The frame is therefore split into DISJOINT
+    // horizontal bands — carbon above the panel, the panel, carbon below — and
+    // the tissue is drawn once per band, culled to it. This used to be a full
+    // carbon pass plus a full violet pass whenever the panel was on screen: twice
+    // the strokes through exactly the transition where the panel slides in, and
+    // on wide viewports (where the panel parks a little short of covering the
+    // screen) twice at rest as well.
+    //
+    // The panel spans the viewport's full width — it is a ScrollShell panel — so
+    // the bands are rows and there is no carbon to draw beside it.
+    //
+    // Rounded outward twice. First to whole CSS pixels, or a hairline of carbon
+    // shows along the panel's edge — the panel rests a fraction of a pixel off
+    // the top, and what is under that fraction is this canvas. Then to DEVICE
+    // pixels: at a fractional dpr a whole CSS pixel is not a whole device one,
+    // the edge would anti-alias, and the two clips meeting there would leave a
+    // seam of half-covered pixels.
+    let top = H;
+    let bot = H;
+    if (rect && rect.bottom > 0 && rect.top < H && rect.width > 0) {
+      top = clamp(Math.floor(Math.floor(rect.top) * dpr) / dpr, 0, H);
+      bot = clamp(Math.ceil(Math.ceil(rect.bottom) * dpr) / dpr, 0, H);
     }
 
-    if (rect && rect.bottom > 0 && rect.top < H && rect.width > 0) {
-      // Rounded outward, or a hairline of carbon shows along the panel's edge.
-      const rx = Math.floor(rect.left);
-      const ry = Math.floor(rect.top);
-      const rw = Math.ceil(rect.right) - rx;
-      const rh = Math.ceil(rect.bottom) - ry;
+    const band = (y0: number, y1: number, pal: Palette) => {
+      if (y1 <= y0) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.save();
       ctx.beginPath();
-      ctx.rect(rx, ry, rw, rh);
+      ctx.rect(0, y0, W, y1 - y0);
       ctx.clip();
-      ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = VIOLA_SOLID;
-      ctx.fillRect(rx, ry, rw, rh);
-      drawTree(ctx, org, s, cl, pu, c, ON_VIOLA);
+      if (pal === ON_VIOLA) {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = VIOLA_SOLID;
+        ctx.fillRect(0, y0, W, y1 - y0);
+      } else {
+        ctx.clearRect(0, y0, W, y1 - y0);
+      }
+      drawTree(ctx, org, s, cl, pu, c, pal, y0, y1);
       ctx.restore();
-    }
+    };
+
+    band(0, top, ON_CARBON);
+    band(top, bot, ON_VIOLA);
+    band(bot, H, ON_CARBON);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
 
@@ -742,6 +865,7 @@ export default function StromaCanvas() {
       count: new Int32Array(NBUCKET),
       start: new Int32Array(NBUCKET),
       cursor: new Int32Array(NBUCKET),
+      cut: new Uint8Array(n),
       // +1 for the growing tip, which is appended as an ordinary last vertex.
       q: new Float64Array((longest + 1) * 2),
     };
@@ -752,7 +876,10 @@ export default function StromaCanvas() {
       const W = canvas.clientWidth;
       const H = canvas.clientHeight;
       if (W === 0 || H === 0) return;
-      const dpr = Math.min(W > 1600 ? 1.5 : 2, window.devicePixelRatio || 1);
+      const native = Math.min(W > 1600 ? 1.5 : 2, window.devicePixelRatio || 1);
+      // The governor's tier on top — never below the floor, and never ABOVE what
+      // the device asked for when that is already under it (a zoomed-out browser).
+      const dpr = Math.max(Math.min(native, DPR_FLOOR), native * QUALITY[gov.current.tier]);
       size.current = { w: W, h: H, dpr };
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
@@ -790,6 +917,7 @@ export default function StromaCanvas() {
     };
 
     resize();
+    resizeRef.current = resize;
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
@@ -840,7 +968,10 @@ export default function StromaCanvas() {
     const segs = org.spineEdge.length;
     const sTarget = Math.min(segs, ord + q);
 
-    const dt = lastTime.current ? Math.min(64, state.time - lastTime.current) : 0;
+    // Raw for the governor, clamped for the eases: a backgrounded tab must not
+    // lurch the camera, but it must not be averaged into the frame time either.
+    const elapsed = lastTime.current ? state.time - lastTime.current : 0;
+    const dt = Math.min(64, elapsed);
     lastTime.current = state.time;
 
     // A jump repositions every section at once and teleports sectionIndex; the
@@ -1017,6 +1148,33 @@ export default function StromaCanvas() {
     ) {
       return;
     }
+
+    // The governor — see QUALITY. `resize` paints once on its own, without the
+    // panel's rect; harmless, because the paint below lands in this same frame
+    // and is what reaches the screen.
+    const g = gov.current;
+    // Over half a second is a tab coming back, not a frame. Under that a sample
+    // is clamped rather than dropped: a device crawling at 8fps has to be able
+    // to trip this, and one hitch must not.
+    if (
+      g.tier < QUALITY.length - 1 &&
+      // Already at the floor: a step would reallocate the canvas at the same size.
+      size.current.dpr > DPR_FLOOR &&
+      state.time > WARMUP_MS &&
+      elapsed > 0 &&
+      elapsed < 500
+    ) {
+      const ms = Math.min(100, elapsed);
+      g.ema = g.ema === 0 ? ms : g.ema + (ms - g.ema) * 0.1;
+      g.slow = g.ema > SLOW_MS ? g.slow + 1 : 0;
+      if (g.slow >= SLOW_FRAMES) {
+        g.tier++;
+        g.ema = 0;
+        g.slow = 0;
+        resizeRef.current();
+      }
+    }
+
     painted.current = {
       x: c.x, y: c.y, logS: c.logS, focus: c.focus,
       yaw: c.yaw, pitch: c.pitch, s, cl, rect: rectSig,

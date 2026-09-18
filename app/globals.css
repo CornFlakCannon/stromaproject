@@ -264,6 +264,15 @@ dialog::backdrop {
   display: none;
 }
 
+/* The project cards wear `.satin`, whose backdrop blur has to be refiltered every
+   time what is behind it changes — and behind these is the canvas, which repaints
+   per frame. That is one refilter per card per frame, for a 2px blur of a flat
+   violet flood under an 82% carbon fill, which nobody can see. The manifesto card and
+   the dialogs keep theirs: there the tissue behind is lit, and the blur reads. */
+.opere .satin {
+  backdrop-filter: none;
+}
+
 /* Flesh on viola is a low-contrast pair, so the word went soft at exactly the
    moment it was being pointed at. A carbon copy of the same glyphs, dropped
    slightly below, gives every stroke a dark edge — legibility and a small lift

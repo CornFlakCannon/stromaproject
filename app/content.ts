@@ -619,8 +619,4 @@ export const CONTATTO = {
   } satisfies Copy,
   emailLabel: { it: "Scrivici", en: "Write to us" } satisfies Copy,
   subject: { it: "Sono qui", en: "I am here" } satisfies Copy,
-  colophon: {
-    it: "STROMA — tessuto in formazione",
-    en: "STROMA — tissue in formation",
-  } satisfies Copy,
 };
