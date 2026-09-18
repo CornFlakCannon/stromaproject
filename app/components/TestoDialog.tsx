@@ -238,7 +238,7 @@ export default function TestoDialog({
          of it on a wide screen. Both UA caps go and `m-auto` centres it, as in
          LeafLightbox. No display utility here, ever: `display` is owned by
          .testo-card in globals.css — see .aside-card for why. */
-      className="satin testo-card m-auto h-[100svh] max-h-none w-screen max-w-none overflow-hidden p-0 text-bone md:w-[72vw]"
+      className="satin testo-card m-auto h-[100dvh] max-h-none w-screen max-w-none overflow-hidden p-0 text-bone md:w-[72vw]"
     >
       {testo && (
         <>

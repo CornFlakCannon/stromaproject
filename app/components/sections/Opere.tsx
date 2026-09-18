@@ -192,7 +192,7 @@ export default function Opere({ index }: { index: number }) {
       <div
         ref={panel}
         data-organ-invert
-        className="opere relative z-10 flex min-h-[100svh] flex-col justify-center gap-[3svh] overflow-hidden px-5 py-24 text-carbon md:px-8"
+        className="opere relative z-10 flex min-h-[100dvh] flex-col justify-center gap-[3svh] overflow-hidden px-5 py-24 text-carbon md:px-8"
       >
         <Section start={SNAP.normal}>
           <SDiv budget={PLAY} anim={rise} className="flex items-center gap-6">

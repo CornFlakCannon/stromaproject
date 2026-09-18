@@ -15,14 +15,17 @@ const LANGS = ["it", "en"] as const;
 export default function Contatto({ index }: { index: number }) {
   return (
     <Section index={index} snap end={SNAP.normal + SPAN}>
-      <div className="relative z-10 flex min-h-[100svh] flex-col justify-between px-5 pb-8 pt-24 md:px-8 md:pb-10">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col justify-between px-5 pb-8 pt-24 md:px-8 md:pb-10">
         <Section start={SNAP.normal}>
           <div className="flex flex-1 flex-col justify-center gap-[4svh]">
             <SDiv budget={PLAY} anim={rise} className="t-meta text-viola">
               <T c={CONTATTO.eyebrow} />
             </SDiv>
 
-            <h2 className="t-cubital text-[13vw] md:text-[8vw]">
+            {/* 9.5vw, not more: "COSTRUIAMO" is one unbreakable word at 125% stretch,
+                measured 8.9em wide, and a 320px phone leaves it 87.5vw between the
+                gutters. */}
+            <h2 className="t-cubital text-[9.5vw] md:text-[8vw]">
               <SDiv start={BEAT} budget={PLAY} anim={riseHeavy}>
                 <TBlock c={CONTATTO.headline[0]} />
               </SDiv>
@@ -67,7 +70,7 @@ export default function Contatto({ index }: { index: number }) {
                     data-t={l}
                     lang={l}
                     href={`mailto:${CONTACT.email}?subject=${encodeURIComponent(CONTATTO.subject[l])}`}
-                    className="t-condensed inline-block break-all text-[8vw] text-bone transition-colors hover:text-flesh md:text-[4vw]"
+                    className="t-condensed inline-block break-all text-[6.2vw] text-bone transition-colors hover:text-flesh md:text-[4vw]"
                   >
                     {CONTACT.email}
                   </a>

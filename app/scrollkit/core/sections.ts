@@ -320,5 +320,5 @@ export function Section({
   const provider = createElement(SectionContext.Provider, { value }, children);
   if (!isTop) return provider;
   // eslint-disable-next-line react-hooks/refs -- forwarding the ref to the DOM node, not reading it in render
-  return createElement("div", { ref: elRef, className: "min-h-[100svh] shrink-0" }, provider);
+  return createElement("div", { ref: elRef, className: "min-h-[100dvh] shrink-0" }, provider);
 }

@@ -384,7 +384,7 @@ export default function ScrollShell ({
       mainContainer.current.addEventListener('pointercancel', endDrag);
       // Each direct child is a full-viewport section wrapper.
       for (const el of mainContainer.current.children) {
-        el.classList.add("min-h-[100svh]");
+        el.classList.add("min-h-[100dvh]");
       }
     }
 
@@ -406,10 +406,15 @@ export default function ScrollShell ({
   // natively and the accumulator never sees the gesture. With it, every touch is
   // delivered to our handler and drives the animation instead. (overscroll-none also
   // kills pull-to-refresh.) Wheel/desktop is unaffected — touch-action is touch-only.
+  //
+  // Panel HEIGHT is `dvh`, not `svh`: a `fixed inset-0` layer (the site's canvas) is as
+  // tall as the visible viewport, and on phones where that exceeds `svh` a shorter
+  // shell lets it show the next panel in the gap. The document never scrolls, so `dvh`
+  // cannot oscillate with a URL bar, and the glide re-reads `offsetTop` every frame.
   return (
     <div
       ref={mainContainer}
-      className="relative flex flex-col bg-black w-full max-h-[100svh] overflow-y-scroll no-scrollbar touch-none overscroll-none"
+      className="relative flex flex-col bg-black w-full max-h-[100dvh] overflow-y-scroll no-scrollbar touch-none overscroll-none"
     >
       <ScrollStateProvider store={store}>
         {children}

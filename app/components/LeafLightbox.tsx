@@ -209,7 +209,7 @@ export default function LeafLightbox({
          zeroes the margin it would be centred by. `w-fit`, not `w-auto`: with
          `inset: 0` an auto width stretches to both edges. No display utility
          here, ever: see .aside-card in globals.css. */
-      className="satin m-auto h-[100svh] max-h-none w-fit max-w-none overflow-hidden p-0 text-bone"
+      className="satin m-auto h-[100dvh] max-h-none w-fit max-w-none overflow-hidden p-0 text-bone"
     >
       {leaf && (
         /* The frame. The padding lives here and not on the dialog, so that a
@@ -226,7 +226,7 @@ export default function LeafLightbox({
             /* The fit: as wide as the leaf is at the frame's height, or as
                wide as the screen allows, whichever is smaller. */
             style={{
-              width: `min(calc(100vw - 2 * ${FRAME}), calc((100svh - 2 * ${FRAME}) * ${ratio}))`,
+              width: `min(calc(100vw - 2 * ${FRAME}), calc((100dvh - 2 * ${FRAME}) * ${ratio}))`,
             }}
           >
             <div

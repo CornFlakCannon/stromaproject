@@ -24,7 +24,7 @@ export default function ChiSiamo({ index }: { index: number }) {
 
   return (
     <Section index={index} snap end={SNAP.normal + SPAN}>
-      <div className="relative z-10 flex min-h-[100svh] flex-col justify-center gap-[5svh] px-5 py-24 md:px-8">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col justify-center gap-[5svh] px-5 py-24 md:px-8">
         <Section start={SNAP.normal}>
           <SDiv budget={PLAY} anim={rise} className="t-meta text-bone/60">
             <T c={CHI_SIAMO.eyebrow} />

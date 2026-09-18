@@ -90,7 +90,7 @@ it — so a section that glides in and then plays one normal budget ends at
 
 ```tsx
 <Section index={1} snap end={SNAP.normal + BUDGET.normal}>
-  <div className="relative flex min-h-[100svh] items-center justify-center bg-[#0b0b10]">
+  <div className="relative flex min-h-[100dvh] items-center justify-center bg-[#0b0b10]">
     <Section start={SNAP.normal}>
       {/* widgets — `start={0}` here means "the moment the panel lands" */}
     </Section>

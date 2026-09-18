@@ -352,7 +352,7 @@ const py = (p: Proj, x: number, y: number, z: number) =>
  * and paints, as the engine requires.
  *
  * Mounted as a direct child of <ScrollShell>. The wrapper is `fixed`, so the
- * `min-h-[100svh]` the shell stamps onto every direct child is inert and no
+ * `min-h-[100dvh]` the shell stamps onto every direct child is inert and no
  * panel's offsetTop moves.
  */
 export default function StromaCanvas() {
@@ -635,7 +635,7 @@ export default function StromaCanvas() {
     // The violet panel's fill is OPAQUE, so whenever it covers the viewport every
     // carbon stroke underneath is painted over and thrown away; skipping the pass
     // is most of the frame. Measured on a wide viewport this never fires — the
-    // panel is `min-h-[100svh]` and its content fits, so it is exactly one
+    // panel is `min-h-[100dvh]` and its content fits, so it is exactly one
     // viewport tall and the engine parks it a couple of hundred pixels up. It
     // earns its keep on narrow viewports, where the two columns wrap and the
     // panel grows past the fold. The clear below goes with it: this is only safe

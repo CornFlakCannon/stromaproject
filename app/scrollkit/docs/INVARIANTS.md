@@ -53,7 +53,7 @@ The mutation has to stay inside the store or the React compiler lint rejects it.
 
 ## Structure
 
-**Every direct child of `<ScrollShell>` is a panel.** The shell adds `min-h-[100svh]` to
+**Every direct child of `<ScrollShell>` is a panel.** The shell adds `min-h-[100dvh]` to
 each DOM child at runtime and treats it as a full-viewport box. Put anything else through
 a portal (like `DevHud` and `SectionNav`) or accept that it occupies a screen. Portaled
 children still read the scroll store — React context flows through portals.
@@ -63,9 +63,15 @@ layout box, purely shifting its descendants' scroll origin. It must stay that wa
 `min-h` box in the middle of an absolutely-composed scene inflates the container and
 dislocates the layout.
 
-**`min-h-[100svh]` on a panel is load-bearing**, and it is applied by `<Section>` itself
+**`min-h-[100dvh]` on a panel is load-bearing**, and it is applied by `<Section>` itself
 rather than at runtime: in a flex column, a hair under `100vh` lets the last panel's top
 strand out of reach.
+
+**Panel height is `dvh`; authored distances are `svh`.** The shell and its panels must be
+exactly as tall as a `fixed inset-0` layer, or that layer shows the next panel in the gap
+— and on some phones the visible viewport is taller than `100svh`. `dvh` is safe here
+because the document itself never scrolls (no URL bar to collapse) and the glide re-reads
+`offsetTop` every frame, so a height change re-lands the panel on its own.
 
 **The scroll container must be the panels' `offsetParent`.** `ScrollShell` is `relative`
 for exactly this reason — `sectionScrollTop` reads `el.offsetTop` and assumes it. Do not

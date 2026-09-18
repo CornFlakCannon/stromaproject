@@ -29,7 +29,7 @@ export default function Galleria({ index }: { index: number }) {
 
   return (
     <Section index={index} snap end={SNAP.normal + SPAN}>
-      <div className="relative z-10 flex min-h-[100svh] flex-col justify-center gap-[4svh] overflow-hidden py-24">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col justify-center gap-[4svh] overflow-hidden py-24">
         <Section start={SNAP.normal}>
           <SDiv
             budget={PLAY}

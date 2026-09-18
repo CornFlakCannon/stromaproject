@@ -62,7 +62,7 @@ export default function Page() {
   return (
     <ScrollShell>
       <Section index={0} snap end={SNAP.normal + BUDGET.normal}>
-        <div className="flex min-h-[100svh] items-center justify-center bg-black">
+        <div className="flex min-h-[100dvh] items-center justify-center bg-black">
           <Section start={SNAP.normal}>
             <SDiv
               budget={BUDGET.normal}

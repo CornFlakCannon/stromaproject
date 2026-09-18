@@ -31,7 +31,7 @@ export default function Manifesto({ index }: { index: number }) {
 
   return (
     <Section index={index} snap end={SNAP.normal + SPAN}>
-      <div className="aside-host relative z-10 flex min-h-[100svh] flex-col justify-center gap-[5svh] px-5 py-24 md:px-8">
+      <div className="aside-host relative z-10 flex min-h-[100dvh] flex-col justify-center gap-[5svh] px-5 py-24 md:px-8">
         <Section start={SNAP.normal}>
           <SDiv budget={PLAY} anim={rise} className="t-meta text-bone/60">
             <T c={MANIFESTO.eyebrow} />

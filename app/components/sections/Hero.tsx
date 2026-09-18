@@ -18,7 +18,7 @@ export default function Hero({ index }: { index: number }) {
     // screen. A jump back to it (Home, an arrow key) wants it whole — see `landing` in
     // scrollkit/core/sections.ts. Safe at 0 here: index 0, and no snap span to strand in.
     <Section index={index} end={SPAN} landing={0}>
-      <div className="relative z-10 flex min-h-[100svh] flex-col justify-end gap-[4svh] px-5 pb-8 pt-20 md:justify-center md:gap-[6svh] md:px-8 md:pb-10 md:pt-24">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col justify-end gap-[4svh] px-5 pb-8 pt-20 md:justify-center md:gap-[6svh] md:px-8 md:pb-10 md:pt-24">
         {/* Bled a hair off the left margin, the way the concept board crops it. */}
         <SDiv budget={SPAN} anim={heroExit} className="-ml-[1.4vw] select-none">
           <h1 className="t-cubital text-[26vw] text-viola md:text-[16vw]">

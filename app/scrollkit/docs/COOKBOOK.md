@@ -22,7 +22,7 @@ layout; the nested `<Section>` delays the contents until the panel has landed.
 
 ```tsx
 <Section index={1} snap end={SNAP.normal + BUDGET.normal}>
-  <div className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-[#0b0b10]">
+  <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#0b0b10]">
     <Section start={SNAP.normal}>
       {/* widgets: start={0} is "the moment this panel lands" */}
     </Section>
