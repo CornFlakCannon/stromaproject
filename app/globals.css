@@ -1,0 +1,495 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   STROMA — design tokens
+   Five colours, no more. Carbon ground, the violet from the concept board,
+   bone type, and one histological pink reserved for exactly two moments.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-carbon: #050505;
+  --color-ink: #0b0b12;
+  --color-viola: #6039ff;
+  --color-bone: #eceef2;
+  --color-flesh: #ff4fb8;
+
+  --font-display: var(--font-archivo);
+  --font-voice: var(--font-instrument);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ScrollShell relies on this class existing (app/scrollkit/README.md). */
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer base {
+  html {
+    background: var(--color-carbon);
+    color: var(--color-bone);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-carbon);
+    color: var(--color-bone);
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background: var(--color-viola);
+    color: var(--color-bone);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-viola);
+    outline-offset: 3px;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Type roles. The system is the WIDTH axis of one family: headlines ride the
+   expanded end, lists the condensed end. Same voice, opposite lungs.
+--------------------------------------------------------------------------- */
+@layer components {
+  .t-cubital {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-stretch: 125%;
+    line-height: 0.82;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+
+  .t-condensed {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 62%;
+    line-height: 0.9;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+  }
+
+  .t-voice {
+    font-family: var(--font-voice);
+    font-weight: 400;
+    line-height: 1.24;
+    letter-spacing: -0.01em;
+  }
+
+  .t-meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Bilingual copy without a React re-render. Both languages ship in the DOM;
+   the inactive one is display:none, so screen readers only ever meet one.
+   The toggle writes document.documentElement.dataset.lang — nothing repaints
+   through React, so no SDiv flashes back to its p=0 pose for a frame.
+--------------------------------------------------------------------------- */
+html[data-lang="it"] [data-t="en"],
+html[data-lang="en"] [data-t="it"] {
+  display: none;
+}
+
+/* The language buttons read their own active state off the same attribute.
+   Flesh is the site's "this one is live" colour — same signal as the active
+   destination in the bar, so the two cannot drift apart. */
+[data-lang-opt] {
+  opacity: 0.5;
+}
+html[data-lang="it"] [data-lang-opt="it"],
+html[data-lang="en"] [data-lang-opt="en"] {
+  opacity: 1;
+  color: var(--color-flesh);
+}
+
+/* ---------------------------------------------------------------------------
+   Duotone. Two earlier attempts failed for the same reason: a single
+   mix-blend-color layer keeps the hue at full strength across the whole tonal
+   range (a flat violet blob), and the lighten/darken clamp pair only touches
+   the extremes, leaving every midtone grey.
+
+   A filter chain remaps the entire range instead. Greyscale first, then sepia
+   to give the image one hue to rotate, then rotate it onto the palette's own
+   hue. No blend modes, so no stacking-context surprises.
+--------------------------------------------------------------------------- */
+.duo-viola {
+  filter: grayscale(1) contrast(1.4) brightness(0.44) sepia(1) hue-rotate(202deg)
+    saturate(2.2);
+}
+
+.duo-flesh {
+  filter: grayscale(1) contrast(1.08) brightness(0.55) sepia(1) hue-rotate(272deg)
+    saturate(2.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The hero is the one thing that must be there before a wheel is touched, so
+   it arrives on load rather than on scroll. Everything below it enters through
+   scrollkit instead. Reduced motion collapses this to its end state.
+--------------------------------------------------------------------------- */
+@keyframes stroma-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.34em, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.enter {
+  animation: stroma-enter 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The same idea at the pace of an answer rather than an arrival: the Opere grid
+   appears because someone clicked, so it lands in half the time and picks up a
+   hair of scale. `both` holds the from-pose during the per-card delay, which is
+   what makes the stagger read. Going from display:none to display:grid restarts
+   it, so the grid replays every time a discipline is opened. */
+@keyframes stroma-card {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.6svh, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.enter-card {
+  animation: stroma-card 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* A canvas that paints once cannot keep the violet flood aligned to a panel
+     that still scrolls — so that panel takes its background back. */
+  [data-organ-invert] {
+    background: var(--color-viola);
+  }
+}
+
+/* A hairline that reads as a seam in the tissue rather than a border. */
+.rule {
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--color-bone) 34%, transparent),
+    transparent
+  );
+  height: 1px;
+}
+
+/* ---------------------------------------------------------------------------
+   The founder's card sits in the top layer, so it needs no z-index of its own —
+   but the UA's default backdrop is far too pale for a carbon panel to read
+   against it, and Tailwind's preflight has already emptied ::backdrop's box.
+--------------------------------------------------------------------------- */
+dialog::backdrop {
+  background: color-mix(in oklab, var(--color-carbon) 84%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   OPERE — four disciplines, one grid at a time.
+
+   Same principle as [data-lang] above and [data-aside] below: the panel is full
+   of SDivs, every one of which re-applies its p=0 pose on render, so the choice
+   is written as an attribute and read by CSS. No render, no flash.
+
+   Three rules, and they scale by themselves — adding a discipline in content.ts
+   needs nothing here, because nothing names one.
+--------------------------------------------------------------------------- */
+
+/* Unlayered on purpose, and this is the load-bearing part: it has to outrank the
+   Tailwind `grid`/`flex` utility sitting on the very same element. A layered
+   utility beating a display rule is exactly the bug that left an invisible,
+   clickable dialog over half the page — see .aside-card below.
+
+   Scoped to .opere, and named `data-shown` rather than something generic, so it
+   cannot reach an unrelated element: the manifesto card's pager dots already
+   carry a data-on of their own, and an unscoped rule here would have hidden
+   every dot that was not the current page. */
+.opere [data-shown="false"] {
+  display: none;
+}
+
+/* Choosing a discipline retires the list of four and reveals the way back. */
+.opere[data-cat] .opere-cats {
+  display: none;
+}
+
+/* The photo player (components/Slides). The track starts at the window's
+   centre (`left: 50%`) and is pulled back by `--x`, the measured middle of
+   the current card, so that card sits centred and its neighbours show at the
+   edges. `--x` and `data-on` are written by the component's own hand, never by
+   a render — see the note there. Unlayered, like the rules above. */
+.slides-track {
+  --x: 0px;
+  translate: calc(-1 * var(--x)) 0;
+  transition: translate 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slides [data-slide] {
+  transition: opacity 640ms ease;
+}
+.slides [data-slide]:not([data-on="true"]) {
+  opacity: 0.5;
+}
+
+.opere:not([data-cat]) .opere-back {
+  display: none;
+}
+
+/* Flesh on viola is a low-contrast pair, so the word went soft at exactly the
+   moment it was being pointed at. A carbon copy of the same glyphs, dropped
+   slightly below, gives every stroke a dark edge — legibility and a small lift
+   in one move.
+
+   Two things are load-bearing. The base offset is `0 0`, not `none`: there is
+   nothing to interpolate out of `none`, and the shadow would appear in one jump
+   instead of sliding down. And the rule targets `[data-word]`, not the button —
+   that span is the rectangle `select()` measures to fly the word into the
+   heading, and text-shadow is paint only, so the flight measures the same box it
+   did before. (Aiming at the button would also shadow the `·`, which is decor.)
+
+   Offset in `em` so it tracks the type from `text-[11vw]` to `md:text-[5.4vw]`
+   without a second value. */
+.opere-cats button [data-word] {
+  text-shadow: 0 0 0 var(--color-carbon);
+  transition: text-shadow 200ms ease;
+}
+
+.opere-cats button:hover [data-word],
+.opere-cats button:focus-visible [data-word] {
+  text-shadow: 0 0.055em 0 var(--color-carbon);
+}
+
+/* The promoted heading keeps it for good: it is permanently flesh on the same
+   violet wall, and it is the same word continuing out of the button that was
+   under the cursor a moment ago — dropping the shadow mid-flight would break the
+   FLIP into two different words. */
+.opere h3 [data-word] {
+  text-shadow: 0 0.055em 0 var(--color-carbon);
+}
+
+/* ---------------------------------------------------------------------------
+   THE GROUND UNDER EACH DISCIPLINE — the project pages at /opere/…
+
+   One mark per category, all of the same family: a single hairline geometry in
+   viola, well under the text, over carbon. Nothing moves, so there is
+   nothing for prefers-reduced-motion to switch off, and nothing here is an
+   image or a script — each is one element carrying one background.
+
+   They live in CSS rather than in `[background-image:…]` arbitrary values in
+   the JSX because these are gradients worth being able to read. The element
+   that wears them is built in app/opere/backgrounds.tsx.
+--------------------------------------------------------------------------- */
+
+/* Cinema — the letterbox: two filets, and the frame they imply. */
+.ground-cinema {
+  background-image:
+    linear-gradient(
+      color-mix(in oklab, var(--color-viola) 34%, transparent),
+      color-mix(in oklab, var(--color-viola) 34%, transparent)
+    ),
+    linear-gradient(
+      color-mix(in oklab, var(--color-viola) 34%, transparent),
+      color-mix(in oklab, var(--color-viola) 34%, transparent)
+    );
+  background-size:
+    100% 1px,
+    100% 1px;
+  background-position:
+    0 13svh,
+    0 calc(100% - 13svh);
+  background-repeat: no-repeat;
+}
+
+/* Scrittura — ruled paper, at a rhythm close to the prose sitting on it. */
+.ground-scrittura {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-viola) 24%, transparent) 0 1px,
+    transparent 1px 3.2rem
+  );
+}
+
+/* Immagini — the contact sheet: a lattice of dots, nothing joined up. */
+.ground-immagini {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--color-viola) 30%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 2.4rem 2.4rem;
+}
+
+/* Suono — a level meter: vertical bars, masked so they rise out of the floor
+   and never reach the text. Vertical on purpose, so it cannot be mistaken for
+   scrittura's horizontal rules. */
+.ground-suono {
+  background-image: repeating-linear-gradient(
+    to right,
+    color-mix(in oklab, var(--color-viola) 26%, transparent) 0 1px,
+    transparent 1px 1.6rem
+  );
+  mask-image: linear-gradient(to top, black, transparent 42%);
+}
+
+/* ---------------------------------------------------------------------------
+   THE LATERAL ASIDE — the manifesto, read beside the panel that calls it.
+
+   Driven by an attribute on <html> rather than by React, exactly like
+   [data-lang] above: the panel it slides is full of SDivs, and every one of
+   them re-applies its p=0 pose on render, so a state change up there would
+   snap the whole panel back to its entry pose the instant the card opened.
+   One class, one attribute, no render. See app/lib/aside.ts.
+--------------------------------------------------------------------------- */
+/* One duration for the whole gesture: the panel leaving and the card arriving
+   are the same sideways move, and if the two numbers ever drift apart it stops
+   reading as one. */
+:root {
+  --aside-ms: 760ms;
+  --aside-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aside-host {
+  transition:
+    transform var(--aside-ms) var(--aside-ease),
+    opacity calc(var(--aside-ms) * 0.7) var(--aside-ease);
+}
+
+html[data-aside="manifesto"] .aside-host {
+  transform: translateX(-34vw);
+  opacity: 0;
+}
+
+/* The card is see-through on purpose: the tissue keeps growing behind the text,
+   and the camera pans sideways with the card, so the background has to stay
+   legible. That rules out the site-wide backdrop, which would flood it. */
+dialog[data-aside]::backdrop {
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+   THE TEXT READER — TestoDialog. The text does not scroll, it spills: with
+   `column-fill: auto` and a fixed height each column fills to the bottom and
+   the next starts to the RIGHT, past the edge of the box, so the flow ends up
+   as wide as the text is long and a page turn is a translate by one box plus
+   one gutter. The box clips, and is the one place perspective is declared.
+--------------------------------------------------------------------------- */
+/* `display` for the card is declared here and never as a Tailwind class on
+   the <dialog> — the same trap .aside-card documents below. */
+.testo-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.testo-card:not([open]) {
+  display: none;
+}
+
+.testo-reader {
+  overflow: hidden;
+  perspective: 100vw;
+}
+
+.testo-flow {
+  column-count: 1;
+  column-gap: 6vw;
+  column-fill: auto;
+}
+
+@media (min-width: 768px) {
+  .testo-flow {
+    column-count: 2;
+    column-gap: 3vw;
+  }
+}
+
+/* The satin ground: carbon you can see through, the tissue kept legible behind
+   it. The manifesto card, the project cards on the Opere wall and both popups
+   (LeafLightbox, TestoDialog) wear it; each adds its own `.grain` on top where
+   it wants the film. Unlayered like everything else in this file. */
+.satin {
+  background: color-mix(in oklab, var(--color-carbon) 82%, transparent);
+  backdrop-filter: blur(2px) saturate(0.85);
+}
+
+.aside-card {
+  /* `display` is declared HERE and never as a Tailwind class on the element.
+     `.flex` lives in @layer utilities — author origin — and the rule that hides a
+     closed dialog, `dialog:not([open]) { display: none }`, lives in the USER-AGENT
+     sheet, which author origin outranks unconditionally. A `flex` class on this
+     element therefore kept the closed card displayed: invisible, but a live,
+     clickable box. `opacity: 0` does not stop hit-testing. These two rules are
+     unlayered, so they win over the utilities and the question cannot come back. */
+  display: flex;
+  flex-direction: column;
+
+  /* THE ENTRANCE. The card is not a thing that appears, it is a thing that
+     arrives: it comes in from the right as the panel leaves to the left, one
+     lateral move in two halves. @starting-style is the opening pose, the
+     :not([open]) rule below is the closing one, and the discrete transitions on
+     `display`/`overlay` keep the element on screen — and in the top layer — long
+     enough to animate out instead of vanishing the instant close() lands. */
+  translate: 0;
+  opacity: 1;
+  transition:
+    translate var(--aside-ms) var(--aside-ease),
+    opacity calc(var(--aside-ms) * 0.55) ease,
+    overlay var(--aside-ms) allow-discrete,
+    display var(--aside-ms) allow-discrete;
+}
+
+.aside-card:not([open]) {
+  display: none;
+  /* Belt and braces for the one window `display: none` does not cover: across the
+     exit transition the card is still `flex` while its opacity falls, and without
+     this it would go on eating clicks for the whole of it. */
+  pointer-events: none;
+  translate: 42vw 0;
+  opacity: 0;
+}
+
+@starting-style {
+  .aside-card[open] {
+    translate: 42vw 0;
+    opacity: 0;
+  }
+}
+
+/* Film grain over everything in the card, the text included. An inline
+   feTurbulence rather than an asset: it is three lines, it never 404s, and it
+   costs no request. */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
