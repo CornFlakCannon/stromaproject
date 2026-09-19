@@ -13,7 +13,6 @@ import {
 } from "@/app/scrollkit";
 import { ASIDE } from "@/app/lib/aside";
 import {
-  BANDS,
   STYLES,
   growOrganism,
   nearestNode,
@@ -21,10 +20,28 @@ import {
   type Organism,
   type TreeNode,
 } from "@/app/lib/tree";
-
-const VIOLA = "96, 57, 255";
-const CARBON = "5, 5, 5";
-const VIOLA_SOLID = "#6039ff";
+import {
+  LOD_MUL,
+  LOD_PX,
+  MAX_WIDTH,
+  MIN_DEVICE_W,
+  BAND_W,
+  NBUCKET,
+  ON_CARBON,
+  ON_VIOLA,
+  SMOOTH_PX,
+  VIOLA_SOLID,
+  WIDTH,
+  beat,
+  mkProj,
+  px,
+  py,
+  type Camera,
+  type Frame,
+  type Palette,
+  type Pulse,
+} from "@/app/lib/tissueStyle";
+import { createTissueGl, type TissueGl } from "@/app/lib/tissueGl";
 
 /** How many rail steps fit the viewport height. The weave's steps lengthen with
  *  depth, so holding this constant *is* the progressive zoom-out — the camera
@@ -141,8 +158,6 @@ const DPR_FLOOR = 1;
 const SLOW_MS = 22;
 const SLOW_FRAMES = 30;
 const WARMUP_MS = 4000;
-/** Skip an edge whose projected size is under this many pixels. */
-const LOD_PX = 1.4;
 /** Mouse tilt limits (radians): ~7° of yaw, ~4° of pitch.
  *
  *  Orthographic parallax is LINEAR in z, so the macro/micro ratio is fixed by
@@ -156,212 +171,9 @@ const PITCH_MAX = 0.4;
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-/**
- * One heartbeat over a unit phase: a main contraction at 0 and a smaller second
- * one just behind it — the lub-dub — then rest. Tabled once, because it is read
- * per POINT while the organ beats, and read with linear interpolation: the
- * nearest entry would step the contraction across the radius and put a visible
- * kink on every long strand wherever the index changed.
- */
-const BEAT_N = 256;
-const BEAT = new Float32Array(BEAT_N);
-{
-  const bump = (u: number, c: number, w: number) => {
-    let d = u - c;
-    d -= Math.round(d); // wrap, so the bump at 0 is whole on both sides of the seam
-    return Math.exp(-(d * d) / (w * w));
-  };
-  for (let i = 0; i < BEAT_N; i++) {
-    const u = i / BEAT_N;
-    BEAT[i] = bump(u, 0, 0.09) + 0.55 * bump(u, 0.16, 0.07);
-  }
-}
-const beat = (u: number) => {
-  const f = (u - Math.floor(u)) * BEAT_N;
-  const i = f | 0;
-  const t = f - i;
-  return BEAT[i] * (1 - t) + BEAT[(i + 1) % BEAT_N] * t;
-};
-
-/** The organ's contraction, applied to every world point before projection.
- *  `inv` is 1 / the organ's radius, so `lag` is in cycles centre-to-rim. */
-type Pulse = { x: number; y: number; inv: number; amp: number; phase: number; lag: number };
-
-/** Stroke weight in SCREEN pixels, by style bucket. The gap between 0-2 and 3
- *  is the point: development lines are thick, the connective weft is a
- *  hairline. */
-const WIDTH = [
-  2.4,  // LEAD
-  1.5,  // MID
-  1.15, // OUTER
-  1.05, // WEFT
-  3.0, 3.0, 3.0,            // CORE  x3
-  1.2, 1.2, 1.2, 1.2,       // SHELL x4
-  1.1,  // LINK
-  1.8, 1.8,                 // GANGLION x2
-  1.35, // TENDRIL
-  1.15, 1.15,               // HALO x2 — the tentacles around a node's centre
-];
-/**
- * Alpha by style bucket, before the depth band multiplies it.
- *
- * These are budgeted against the fact that violet is rgb(96, 57, 255): the blue
- * channel is ALREADY at 255, so it clips first, at a summed alpha of 1.0. Red
- * follows at 2.66 and green at 4.47 — a long, usable glow ramp rather than a
- * hard clip. A node's core (3 buckets) plus its shell (4) peaks around 2.0,
- * which lands on a bright lilac. At the 0.5-0.6 I first reached for it would
- * have summed past 3.4 and blown out to white.
- */
-const ALPHA = [
-  0.85, // LEAD
-  0.55, // MID
-  0.31, // OUTER
-  0.2,  // WEFT
-  // Everything below overlaps at the node's centre, and `lighter` sums it. The
-  // nucleus alone is 17x covered, so its three buckets each saturate over the
-  // whole bead; add the core passing through and the shell over the top and the
-  // middle stacks about ten buckets deep. Budgeted so the peak lands near 3 —
-  // a glowing pink-white — rather than past 4.47, where green clips too and it
-  // goes flat white.
-  0.24, 0.24, 0.24,         // CORE  x3
-  0.2, 0.2, 0.2, 0.2,       // SHELL x4
-  0.2,  // LINK
-  0.3, 0.3,                 // GANGLION x2
-  0.24, // TENDRIL
-  0.28, 0.28,               // HALO x2
-];
-/** LOD multiplier by style. A table, not a `style >= N` threshold: inserting a
- *  style would silently reclassify everything on the wrong side of it. The core
- *  gets a gentler figure than the shell it anchors, so a node stays legible in
- *  the final zoom-out after its fine orbits have been culled. */
-const LOD_MUL = [1, 1, 1, 1, 0.8, 0.8, 0.8, 2.2, 2.2, 2.2, 2.2, 1.4, 1.6, 1.6, 2.0, 9, 9];
-/** Atmospheric depth, by band: far, middle, near. This — not the geometry — is
- *  what gives the tissue volume while the mouse is still, because an orthographic
- *  projection at yaw 0 discards z entirely. The 3D geometry earns its keep by
- *  making the parallax agree with the shading: what is brighter also moves more. */
-const BAND_W = [0.85, 1.0, 1.15];
-const BAND_A = [0.78, 1.0, 1.12];
-/**
- * Smallest stroke, in DEVICE pixels. The artifact this fixes — a hairline
- * breaking into a bead chain on near-black — is a device-pixel sampling
- * artifact, so the threshold belongs in device pixels and dpr has to appear in
- * the formula. Expressed in CSS pixels it would be wrong in both directions: at
- * dpr 2 it would double the fill area of most of the weave to fix a problem
- * that barely exists there, and at dpr 1 it would be barely enough.
- */
-const MIN_DEVICE_W = 1.2;
-/** Below this projected deviation, a polyline and its smoothed curve differ by
- *  less than a pixel, so smoothing is pure stroker cost. Sub-pixel at the switch
- *  point, which is what makes it safe to flip mid-scroll. */
-const SMOOTH_PX = 0.15;
-/** Band-major, so the far band strokes first. Only matters on the violet panel,
- *  where `source-over` makes paint order visible; on carbon `lighter` is
- *  commutative and order cannot read at all. */
-const NBUCKET = STYLES * BANDS;
-/** Derived, never hand-copied: it drives the cull padding, and a stale literal
- *  would pop strokes at the viewport edge. */
-const MAX_WIDTH = Math.max(Math.max(...WIDTH) * Math.max(...BAND_W), MIN_DEVICE_W);
-
-// Nothing is painted at a node's centre: no dot, no ring, no mass. What reads as
-// a node is the halo of tentacles and the bundles converging on it — the tangle
-// itself, and nothing dropped on top of it.
-type Palette = {
-  /** `gain` is the beat's flush — a multiplier applied before each palette's own
-   *  cap, so a flush can never push a bucket past what it is budgeted for. */
-  lit: (style: number, band: number, gain: number) => string;
-  op: GlobalCompositeOperation;
-};
-
-/** On carbon the tissue glows: additive violet over near-black. */
-const ON_CARBON: Palette = {
-  lit: (st, b, g) => `rgba(${VIOLA}, ${Math.min(1, ALPHA[st] * BAND_A[b] * g).toFixed(3)})`,
-  op: "lighter",
-};
-
-/**
- * Over the violet panel it inverts: the same tissue, drawn in carbon.
- *
- * `source-over` MULTIPLIES rather than adds — n stacked buckets leave
- * `prod(1 - alpha_i)` of the ground showing. A single global `+0.1` lift with a
- * 0.62 cap is fine for a lone hairline and catastrophic for a node, where seven
- * buckets overlap: it would leave 3% of the violet, a solid black blob where the
- * knot should read as dense ink. So the lift and the cap are per style, and the
- * fat ones get no lift and a hard 0.18 ceiling.
- */
-const V_LIFT = [0.1, 0.1, 0.1, 0.12, 0, 0, 0, 0, 0, 0, 0, 0.05, 0, 0, 0.03, 0.05, 0.05];
-const V_CAP = [0.62, 0.5, 0.42, 0.38, 0.16, 0.16, 0.16, 0.18, 0.18, 0.18, 0.18, 0.24, 0.18, 0.18, 0.2, 0.2, 0.2];
-
-// Every table here is indexed by style, and an out-of-range read fails SILENTLY:
-// the spec says a non-finite `lineWidth` is ignored, and so is an unparseable
-// `strokeStyle` — the bucket would simply stroke with the previous bucket's
-// width and colour. No throw, no warning, a plausible and wrong image. Declared
-// after V_CAP because a `const` cannot be read before its own declaration.
-if (
-  WIDTH.length !== STYLES ||
-  ALPHA.length !== STYLES ||
-  LOD_MUL.length !== STYLES ||
-  V_LIFT.length !== STYLES ||
-  V_CAP.length !== STYLES
-) {
-  throw new Error(`StromaCanvas: style tables must all have ${STYLES} entries`);
-}
-
-const ON_VIOLA: Palette = {
-  lit: (st, b, g) =>
-    `rgba(${CARBON}, ${Math.min(V_CAP[st], ALPHA[st] * BAND_A[b] * g + V_LIFT[st]).toFixed(3)})`,
-  op: "source-over",
-};
-
-type Frame = { x: number; y: number; logS: number; focus: number };
-type Camera = Frame & { yaw: number; pitch: number };
 /** The pull-back framing, plus the organ's radius (half the fitted box's
  *  diagonal, world units) that the beat is measured against. */
 type Reveal = Frame & { r: number };
-
-/**
- * World → screen, orthographic, rotated about the camera's focus point.
- *
- *     rx = x - cam.x ;  ry = y - cam.y ;  rz = z
- *     x1 =  rx·cosYaw + rz·sinYaw
- *     z1 = -rx·sinYaw + rz·cosYaw
- *     y1 =  ry·cosPitch - z1·sinPitch
- *     sx = W/2 + x1·scale ;  sy = H·focus + y1·scale
- *
- * ORTHOGRAPHIC on purpose. Points at different z still shear sideways by
- * `z·sinYaw`, which *is* the parallax; and because the map stays affine, a point
- * lerped in world space and then projected equals the projection lerped in
- * screen space — which is what lets the growing tip interpolate correctly. A
- * perspective divide would break that, would give the LEAST parallax at the
- * focus point (exactly where the reader is looking), and would make both the
- * interval culling and `revealCamera`'s fit non-linear.
- *
- * This struct is the single definition. Every consumer goes through `px`/`py`,
- * so no two of them can drift apart.
- */
-type Proj = {
-  cx: number; cy: number; scale: number;
-  cyaw: number; syaw: number; cpit: number; spit: number;
-  W2: number; Hf: number;
-};
-
-const mkProj = (c: Camera, W: number, H: number): Proj => ({
-  cx: c.x,
-  cy: c.y,
-  scale: Math.exp(c.logS),
-  cyaw: Math.cos(c.yaw),
-  syaw: Math.sin(c.yaw),
-  cpit: Math.cos(c.pitch),
-  spit: Math.sin(c.pitch),
-  W2: W / 2,
-  Hf: H * c.focus,
-});
-
-const px = (p: Proj, x: number, z: number) =>
-  p.W2 + ((x - p.cx) * p.cyaw + z * p.syaw) * p.scale;
-
-const py = (p: Proj, x: number, y: number, z: number) =>
-  p.Hf +
-  ((y - p.cy) * p.cpit - (-(x - p.cx) * p.syaw + z * p.cyaw) * p.spit) * p.scale;
 
 /**
  * The tissue, seen from inside it.
@@ -387,6 +199,13 @@ const py = (p: Proj, x: number, y: number, z: number) =>
 export default function StromaCanvas() {
   const wrap = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLCanvasElement>(null);
+  /** The GPU renderer's own canvas — a canvas holds ONE kind of context, so the
+   *  two paths cannot share an element. Whichever is not painting is hidden and
+   *  its backing store dropped to nothing. */
+  const glRef = useRef<HTMLCanvasElement>(null);
+  /** Null when the device cannot do WebGL2 well; the Canvas path below is then
+   *  the whole renderer, as it always was. See lib/tissueGl.ts. */
+  const glr = useRef<TissueGl | null>(null);
   const store = useScrollStore();
 
   const organism = useRef<Organism | null>(null);
@@ -739,9 +558,9 @@ export default function StromaCanvas() {
     pu: Pulse | null,
     c: Camera,
     rect: DOMRect | null,
+    /** The diff harness paints the Canvas path while the GPU one is live. */
+    force?: "2d",
   ) => {
-    const ctx = ref.current?.getContext("2d");
-    if (!ctx) return;
     const { w: W, h: H, dpr } = size.current;
 
     // The violet panel's fill is OPAQUE, so every carbon stroke under it is
@@ -768,6 +587,22 @@ export default function StromaCanvas() {
       top = clamp(Math.floor(Math.floor(rect.top) * dpr) / dpr, 0, H);
       bot = clamp(Math.ceil(Math.ceil(rect.bottom) * dpr) / dpr, 0, H);
     }
+
+    // The GPU path takes the same frame and the same band, in the device pixels
+    // the rounding above already landed on. Everything below is the fallback.
+    const g = glr.current;
+    if (g && !g.lost && force !== "2d") {
+      g.render({
+        s, cl, pulse: pu, cam: c, W, H, dpr,
+        gain: pu ? 1 + PULSE_GLOW * beat(pu.phase) : 1,
+        topDev: Math.round(top * dpr),
+        botDev: Math.round(bot * dpr),
+      });
+      return;
+    }
+
+    const ctx = ref.current?.getContext("2d");
+    if (!ctx) return;
 
     const band = (y0: number, y1: number, pal: Palette) => {
       if (y1 <= y0) return;
@@ -881,8 +716,22 @@ export default function StromaCanvas() {
       // the device asked for when that is already under it (a zoomed-out browser).
       const dpr = Math.max(Math.min(native, DPR_FLOOR), native * QUALITY[gov.current.tier]);
       size.current = { w: W, h: H, dpr };
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
+      // One backing store, not two: the idle canvas keeps its CSS box (it is what
+      // `clientWidth` and the ResizeObserver read) and holds no pixels.
+      const g = glr.current;
+      const onGl = !!g && !g.lost;
+      const cw = Math.round(W * dpr);
+      const ch = Math.round(H * dpr);
+      const glCanvas = glRef.current;
+      if (glCanvas) {
+        glCanvas.width = onGl ? cw : 0;
+        glCanvas.height = onGl ? ch : 0;
+        glCanvas.style.visibility = onGl ? "visible" : "hidden";
+        if (onGl) g.resize(cw, ch);
+      }
+      canvas.width = onGl ? 0 : cw;
+      canvas.height = onGl ? 0 : ch;
+      canvas.style.visibility = onGl ? "hidden" : "visible";
 
       painted.current = { x: 0, y: 0, logS: 0, focus: 0, yaw: 0, pitch: 0, s: -1, cl: -1, rect: -1e9 };
       revealMemo.current = { s: -1e9, w: 0, h: 0, cam: null };
@@ -916,8 +765,51 @@ export default function StromaCanvas() {
       paint(org, lastS.current, closeShown.current, null, cam.current, null);
     };
 
+    // The GPU renderer, unless the URL asks for the Canvas one (`?renderer=2d`,
+    // for A/B and for the bench). Read off `location`, not `useSearchParams`,
+    // which would want a Suspense boundary under the static export. A context
+    // lost or restored lands here as a resize: it swaps the canvases and
+    // repaints, and the dead band is reset so the next frame cannot be skipped.
+    const qs = new URLSearchParams(window.location.search);
+    if (qs.get("renderer") !== "2d" && glRef.current) {
+      glr.current = createTissueGl(glRef.current, org, () => resizeRef.current());
+    }
+
     resize();
     resizeRef.current = resize;
+
+    // The instruments — `?bench`, `?diff`, see lib/tissueBench.ts. A dynamic
+    // import behind the query string, so no reader ever downloads them.
+    const scroller = wrap.current?.parentElement;
+    if ((qs.has("bench") || qs.has("diff")) && glRef.current && scroller) {
+      const canvasGl = glRef.current;
+      void import("@/app/lib/tissueBench").then((m) =>
+        m.attach(
+          {
+            org,
+            canvas2d: canvas,
+            canvasGl,
+            scroller,
+            onGl: () => !!glr.current && !glr.current.lost,
+            size: () => size.current,
+            descent: (at) => {
+              const p = spineAt(org, at);
+              return {
+                x: p.x * LATERAL,
+                y: p.y,
+                logS: Math.log(size.current.h / (VIS_STEPS * p.step)),
+                focus: FOCUS_Y,
+                yaw: 0,
+                pitch: 0,
+              };
+            },
+            reveal: (at) => ({ ...revealCamera(org, at), yaw: 0, pitch: 0 }),
+            paint: (at, cl, pu, c, rect, force) => paint(org, at, cl, pu, c, rect, force),
+          },
+          { bench: qs.has("bench"), diff: qs.has("diff") },
+        ),
+      );
+    }
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
@@ -939,6 +831,8 @@ export default function StromaCanvas() {
     return () => {
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      glr.current?.dispose();
+      glr.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- paint/drawTree read refs only
   }, []);
@@ -1190,7 +1084,8 @@ export default function StromaCanvas() {
       aria-hidden
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-carbon"
     >
-      <canvas ref={ref} className="h-full w-full" />
+      <canvas ref={ref} className="absolute inset-0 h-full w-full" />
+      <canvas ref={glRef} className="absolute inset-0 h-full w-full" />
     </div>
   );
 }
