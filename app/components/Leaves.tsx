@@ -17,18 +17,18 @@ import { T } from "./T";
 const TURN_MS = 620;
 /** Finger travel (px) that counts as a swipe rather than a tap. */
 const SWIPE_PX = 60;
-/** How far the sheet swings away from the reader at the midpoint of a turn. */
-const SWING_DEG = 22;
+/** How far (% of its own width) the sheet slides out before the next slides in. */
+const SLIDE_PCT = 20;
 
 /**
  * A project's leaves, read one at a time: the sheets of a verbo-visual
  * sequence.
  *
- * The page turn is the one the manifesto's reader had before the manifesto
- * became a plate (git: 3ce8fd4, ManifestoAside): the sheet swings through
- * perspective and dips, and at the midpoint — when it is edge-on — the content
- * swaps. There the pages were CSS columns that had to be measured; here they
- * are discrete leaves, so there is nothing to measure and nothing to slide.
+ * The page turn is a plain slide, the same direction as the text reader's
+ * (TestoDialog): the sheet slides out to one side as it fades, and at the
+ * midpoint — when nothing is visible — the content swaps and the next sheet
+ * slides in from the other. Only one leaf is mounted, so the slide is a short
+ * one rather than a track: there is no neighbour to carry into view.
  *
  * `page` is React state, and that is allowed HERE where it is not on the
  * landing: a project page sits outside ScrollShell, so there is no SDiv around
@@ -68,17 +68,16 @@ export default function Leaves({ items }: { items: Plate[] }) {
     }
 
     locked.current = true;
+    // Two keyframes at the midpoint: the sheet leaves on one side and, in the
+    // same instant — invisible — is set on the other to come back in.
     sw.animate(
       [
-        { transform: "rotateY(0deg) scale(1)", opacity: 1 },
-        {
-          transform: `rotateY(${dir * -SWING_DEG}deg) scale(0.93)`,
-          opacity: 0.45,
-          offset: 0.5,
-        },
-        { transform: "rotateY(0deg) scale(1)", opacity: 1 },
+        { transform: "none", opacity: 1, easing: "ease-in" },
+        { transform: `translateX(${-dir * SLIDE_PCT}%)`, opacity: 0, offset: 0.5 },
+        { transform: `translateX(${dir * SLIDE_PCT}%)`, opacity: 0, offset: 0.5, easing: "ease-out" },
+        { transform: "none", opacity: 1 },
       ],
-      { duration: TURN_MS, easing: "ease-in-out" },
+      { duration: TURN_MS },
     );
     timers.current.push(
       window.setTimeout(() => setPage(to), TURN_MS / 2),
@@ -129,52 +128,48 @@ export default function Leaves({ items }: { items: Plate[] }) {
             on a phone the sheet keeps the full width and the arrows ride on
             its edges instead. */}
         <div className="mx-auto w-[min(100%,calc(82svh*0.707))] md:w-[min(calc(100%_-_2*var(--arrow-room)),calc(82svh*0.707))]">
-          {/* The sheet and its two arrows: the arrows are siblings of the swing,
+          {/* The sheet and its two arrows: the arrows are siblings of the sheet,
             not children, so they stay put while the page turns. */}
           <div className="relative">
-            {/* The only place perspective is declared — one viewport of depth, so
-              the swing reads as a page and not as a wobble. */}
-            <div className="[perspective:120vw]">
-              <div
-                ref={sheet}
-                onPointerDown={onDown}
-                onPointerUp={onUp}
-                onPointerCancel={onUp}
-                className="[touch-action:pan-y] [will-change:transform]"
+            <div
+              ref={sheet}
+              onPointerDown={onDown}
+              onPointerUp={onUp}
+              onPointerCancel={onUp}
+              className="[touch-action:pan-y] [will-change:transform]"
+            >
+              {/* A white sheet — white, not bone: the plates carry their own
+                  white and a bone sheet showed as a frame around it — at the
+                  page's own proportions. */}
+              <figure
+                key={leaf.src}
+                className="w-full bg-white"
+                style={{ aspectRatio: `${leaf.width} / ${leaf.height}` }}
               >
-                {/* A white sheet — white, not bone: the plates carry their own
-                    white and a bone sheet showed as a frame around it — at the
-                    page's own proportions. */}
-                <figure
-                  key={leaf.src}
-                  className="w-full bg-white"
-                  style={{ aspectRatio: `${leaf.width} / ${leaf.height}` }}
+                {/* The sheet is a button: a click opens it full screen. A
+                    swipe ends with a pointerup, not a click, so the two
+                    gestures do not collide. */}
+                <button
+                  type="button"
+                  onClick={() => setOpen(leaf)}
+                  className="block w-full cursor-zoom-in"
                 >
-                  {/* The sheet is a button: a click opens it full screen. A
-                      swipe ends with a pointerup, not a click, so the two
-                      gestures do not collide. */}
-                  <button
-                    type="button"
-                    onClick={() => setOpen(leaf)}
-                    className="block w-full cursor-zoom-in"
-                  >
-                    <Image
-                      src={leaf.src}
-                      width={leaf.width}
-                      height={leaf.height}
-                      /* The caption names it; an attribute cannot carry two languages. */
-                      alt=""
-                      className="h-auto w-full"
-                    />
-                    <span className="sr-only">
-                      <T c={OPERE.open} />
-                    </span>
-                  </button>
-                  <figcaption className="sr-only">
-                    <T c={leaf.caption} />
-                  </figcaption>
-                </figure>
-              </div>
+                  <Image
+                    src={leaf.src}
+                    width={leaf.width}
+                    height={leaf.height}
+                    /* The caption names it; an attribute cannot carry two languages. */
+                    alt=""
+                    className="h-auto w-full"
+                  />
+                  <span className="sr-only">
+                    <T c={OPERE.open} />
+                  </span>
+                </button>
+                <figcaption className="sr-only">
+                  <T c={leaf.caption} />
+                </figcaption>
+              </figure>
             </div>
 
             <button

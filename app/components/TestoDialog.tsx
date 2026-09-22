@@ -10,8 +10,6 @@ const TURN_MS = 620;
 const WHEEL_PER_TURN = 140;
 /** Finger travel (px) that counts as a swipe rather than a tap. */
 const SWIPE_PX = 60;
-/** How far the sheet swings away from the reader at the midpoint of a turn. */
-const SWING_DEG = 22;
 
 /**
  * One text, to be read: a card the height of the screen on the satin ground,
@@ -25,8 +23,8 @@ const SWING_DEG = 22;
  * The text is not scrolled, it is PAGED — the reader the manifesto card had
  * before the manifesto became a plate (git: 1377eb2, ManifestoAside). The text
  * flows through CSS columns and spills sideways out of the box (.testo-flow in
- * globals.css); a turn slides that flow by exactly one box and swings the
- * sheet through perspective on the way. Nothing here knows how long a text is:
+ * globals.css); a turn slides that flow by exactly one box, and that slide is
+ * the whole animation. Nothing here knows how long a text is:
  * the page count is measured, so a poem that fits is one page with no pager
  * and a story is as many as it needs.
  *
@@ -44,7 +42,6 @@ export default function TestoDialog({
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
-  const swing = useRef<HTMLDivElement>(null);
   const flow = useRef<HTMLDivElement>(null);
   /** One dialog per grid, and a page can carry more than one grid. */
   const titleId = useId();
@@ -96,13 +93,11 @@ export default function TestoDialog({
   const goTo = useCallback(
     (next: number): boolean => {
       const f = flow.current;
-      const sw = swing.current;
       const s = step();
-      if (!f || !sw || s <= 0) return false;
+      if (!f || s <= 0) return false;
       const to = Math.max(0, Math.min(next, pages.current - 1));
       if (to === page.current) return false;
 
-      const dir = to > page.current ? 1 : -1;
       const from = -page.current * s;
       page.current = to;
       setShown({ page: to, pages: pages.current });
@@ -112,25 +107,9 @@ export default function TestoDialog({
       f.style.transform = `translateX(${-to * s}px)`;
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
 
-      // Two elements, one gesture: the flow slides, and its PARENT does the
-      // rotation. Keeping the rotated box at the centre of the reader is what
-      // keeps the perspective honest — rotating the flow itself, pages out and
-      // translated far past the perspective origin, keystones into a smear.
       f.animate(
         [{ transform: `translateX(${from}px)` }, { transform: `translateX(${-to * s}px)` }],
         { duration: TURN_MS, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
-      );
-      sw.animate(
-        [
-          { transform: "rotateY(0deg) scale(1)", opacity: 1 },
-          {
-            transform: `rotateY(${dir * -SWING_DEG}deg) scale(0.93)`,
-            opacity: 0.45,
-            offset: 0.5,
-          },
-          { transform: "rotateY(0deg) scale(1)", opacity: 1 },
-        ],
-        { duration: TURN_MS, easing: "ease-in-out" },
       );
       return true;
     },
@@ -166,18 +145,27 @@ export default function TestoDialog({
       turn(dir);
     };
 
-    // Touch turns pages by swiping ACROSS them — the pages are side by side,
-    // and a horizontal drag is the gesture that shape asks for.
-    let from: number | null = null;
+    // Touch turns pages both ways a finger goes: ACROSS them, since the pages
+    // sit side by side, and UP, since that is what a thumb does to read on —
+    // the same intent the wheel's deltaY carries on a desktop. The longer leg
+    // of the drag decides which. The card itself is `touch-action: pinch-zoom`
+    // (see the className), so a drag is ours alone and never scrolls the page
+    // underneath; a cancelled gesture is dropped rather than read as a swipe.
+    let from: { x: number; y: number } | null = null;
     const onDown = (e: PointerEvent) => {
       if (e.pointerType === "mouse") return;
-      from = e.clientX;
+      from = { x: e.clientX, y: e.clientY };
     };
     const onUp = (e: PointerEvent) => {
       if (from === null) return;
-      const travel = from - e.clientX;
+      const dx = from.x - e.clientX;
+      const dy = from.y - e.clientY;
       from = null;
+      const travel = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
       if (Math.abs(travel) >= SWIPE_PX) turn(travel > 0 ? 1 : -1);
+    };
+    const onCancel = () => {
+      from = null;
     };
 
     // Without these the card is a trap for a keyboard reader: the overflowing
@@ -200,7 +188,7 @@ export default function TestoDialog({
     d.addEventListener("wheel", onWheel, { passive: false });
     d.addEventListener("pointerdown", onDown);
     d.addEventListener("pointerup", onUp);
-    d.addEventListener("pointercancel", onUp);
+    d.addEventListener("pointercancel", onCancel);
     d.addEventListener("keydown", onKey);
 
     // A narrower box holds fewer words, so the page count is not a constant —
@@ -218,7 +206,7 @@ export default function TestoDialog({
       d.removeEventListener("wheel", onWheel);
       d.removeEventListener("pointerdown", onDown);
       d.removeEventListener("pointerup", onUp);
-      d.removeEventListener("pointercancel", onUp);
+      d.removeEventListener("pointercancel", onCancel);
       d.removeEventListener("keydown", onKey);
     };
   }, [testo, goTo, measure]);
@@ -237,8 +225,10 @@ export default function TestoDialog({
       /* The height of the screen, the width of a reading measure — two columns
          of it on a wide screen. Both UA caps go and `m-auto` centres it, as in
          LeafLightbox. No display utility here, ever: `display` is owned by
-         .testo-card in globals.css — see .aside-card for why. */
-      className="satin testo-card m-auto h-[100dvh] max-h-none w-screen max-w-none overflow-hidden p-0 text-bone md:w-[72vw]"
+         .testo-card in globals.css — see .aside-card for why.
+         `pinch-zoom` and nothing else: no drag on the card may pan the
+         document behind it, and a pinch still enlarges the text. */
+      className="satin testo-card m-auto h-[100dvh] max-h-none w-screen max-w-none overflow-hidden p-0 text-bone [touch-action:pinch-zoom] md:w-[72vw]"
     >
       {testo && (
         <>
@@ -268,19 +258,17 @@ export default function TestoDialog({
               clientWidth would count that padding into the page step. */}
           <div className="min-h-0 flex-1 px-5 md:px-[3vw]">
             <div ref={viewport} className="testo-reader relative h-full py-[3svh]">
-              <div ref={swing} className="h-full [will-change:transform]">
-                {/* The type role sits on the flow so that a column measures the
-                    serif actually being read — see the prose on the project page. */}
-                <div
-                  ref={flow}
-                  className="testo-flow t-voice h-full whitespace-pre-line text-[4.8vw] text-bone/80 [will-change:transform] md:text-[1.45vw]"
-                >
-                  {testo.text.map((block, i) => (
-                    <p key={i} lang="it" className="mb-[2svh]">
-                      {block}
-                    </p>
-                  ))}
-                </div>
+              {/* The type role sits on the flow so that a column measures the
+                  serif actually being read — see the prose on the project page. */}
+              <div
+                ref={flow}
+                className="testo-flow t-voice h-full whitespace-pre-line text-[4.8vw] text-bone/80 [will-change:transform] md:text-[1.45vw]"
+              >
+                {testo.text.map((block, i) => (
+                  <p key={i} lang="it" className="mb-[2svh]">
+                    {block}
+                  </p>
+                ))}
               </div>
             </div>
           </div>

@@ -229,6 +229,14 @@ export function playDistance(store: ScrollStore, from: number, to: number): numb
   return distance + Math.abs(landingClamped(store, to) - readIndexPos(store, to));
 }
 
+/** How far (px) a panel may still overlap the viewport and count as off-screen. The
+ *  geometry is read in whole pixels, each value rounded on its own: on a phone the
+ *  viewport is fractional (e.g. 891.43px), and `offsetTop` of the next panel can come
+ *  out one pixel short of `scrollTop + clientHeight` while the two actually touch. With
+ *  no slack that panel reads as on-screen forever, settling never ends, and the step
+ *  lock that rides on it swallows every swipe after a jump. */
+const OFFSCREEN_SLACK = 1;
+
 /** Registered sections whose panel lies fully outside the viewport `[scrollTop,
  *  scrollTop + viewportH]`. The core sweeps this across a jump's glide to snap each
  *  section's reset only once it's off-screen (see the settle logic in ScrollShell /
@@ -239,7 +247,12 @@ export function offscreenSections(store: ScrollStore, scrollTop: number, viewpor
     const el = info.el;
     if (!el) continue;
     const top = el.offsetTop;
-    if (top + el.offsetHeight <= scrollTop || top >= scrollTop + viewportH) result.push(index);
+    if (
+      top + el.offsetHeight <= scrollTop + OFFSCREEN_SLACK ||
+      top >= scrollTop + viewportH - OFFSCREEN_SLACK
+    ) {
+      result.push(index);
+    }
   }
   return result;
 }

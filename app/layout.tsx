@@ -28,11 +28,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "STROMA — un tessuto di creativi",
+  title: "STROMA",
   description:
     "STROMA è il tessuto dei nostri organi. Sogniamo che diventi il tessuto di un corpo più grande di noi: un tessuto di creativi.",
   openGraph: {
-    title: "STROMA — un tessuto di creativi",
+    title: "STROMA",
     description: "Costruiamo assieme un nuovo organo che pulsi per l'arte e la vita.",
     locale: "it_IT",
     type: "website",

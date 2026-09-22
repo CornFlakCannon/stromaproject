@@ -131,8 +131,10 @@ export default async function ProjectPage({
   if (!found) notFound();
   const { category, project } = found;
 
+  // `overflow-x-clip`: a turning leaf slides partly off the side of a phone
+  // (Leaves), and the page must not grow a sideways scroll while it does.
   return (
-    <div className="relative min-h-[100svh] bg-carbon">
+    <div className="relative min-h-[100svh] overflow-x-clip bg-carbon">
       {backgroundFor(categoria, slug)}
 
       {/* The way back first, top left, where a reader looks for it; the

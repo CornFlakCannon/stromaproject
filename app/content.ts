@@ -26,6 +26,12 @@ export const NAV: { label: Copy; target: number }[] = [
   { label: { it: "Contatto", en: "Contact" }, target: 5 },
 ];
 
+/** The phone's menu (TopBar): the burger's name and the way out of the panel. */
+export const MENU = {
+  name: { it: "Menu", en: "Menu" } satisfies Copy,
+  close: { it: "Chiudi", en: "Close" } satisfies Copy,
+};
+
 export const HERO = {
   seed: {
     it: "\"Ciò che costituisce la trama fondamentale o la matrice di sostegno di un organo, di un tessuto o di una cellula.\"",
@@ -439,7 +445,6 @@ export const OPERE = {
             { src: "/media/backstage/dsc09938.webp", width: 1800, height: 1200 },
             { src: "/media/backstage/p1110826.webp", width: 1800, height: 1352 },
             { src: "/media/backstage/p1120036.webp", width: 1800, height: 1352 },
-            { src: "/media/backstage/schiele-back.webp", width: 1239, height: 1800 },
             ],
           },
         },

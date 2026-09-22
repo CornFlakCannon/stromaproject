@@ -408,7 +408,7 @@ dialog[data-aside]::backdrop {
    `column-fill: auto` and a fixed height each column fills to the bottom and
    the next starts to the RIGHT, past the edge of the box, so the flow ends up
    as wide as the text is long and a page turn is a translate by one box plus
-   one gutter. The box clips, and is the one place perspective is declared.
+   one gutter. The box clips.
 --------------------------------------------------------------------------- */
 /* `display` for the card is declared here and never as a Tailwind class on
    the <dialog> — the same trap .aside-card documents below. */
@@ -423,7 +423,6 @@ dialog[data-aside]::backdrop {
 
 .testo-reader {
   overflow: hidden;
-  perspective: 100vw;
 }
 
 .testo-flow {
@@ -487,6 +486,58 @@ dialog[data-aside]::backdrop {
 @starting-style {
   .aside-card[open] {
     translate: 42vw 0;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE MENU — TopBar's panel on a phone, where the destinations do not fit in
+   the bar. Built exactly like .aside-card above: `display` declared here and
+   never as a utility, @starting-style for the way in, `:not([open])` for the
+   way out, and the discrete `display`/`overlay` transitions that keep it in the
+   top layer long enough to leave instead of vanishing. It slides in from the
+   right edge it is pinned to, and its backdrop fades with it.
+--------------------------------------------------------------------------- */
+:root {
+  --menu-ms: 480ms;
+}
+
+.menu-card {
+  display: flex;
+  flex-direction: column;
+  translate: 0;
+  transition:
+    translate var(--menu-ms) var(--aside-ease),
+    overlay var(--menu-ms) allow-discrete,
+    display var(--menu-ms) allow-discrete;
+}
+
+.menu-card:not([open]) {
+  display: none;
+  pointer-events: none;
+  translate: 100% 0;
+}
+
+@starting-style {
+  .menu-card[open] {
+    translate: 100% 0;
+  }
+}
+
+.menu-card::backdrop {
+  opacity: 1;
+  transition:
+    opacity var(--menu-ms) ease,
+    overlay var(--menu-ms) allow-discrete,
+    display var(--menu-ms) allow-discrete;
+}
+
+.menu-card:not([open])::backdrop {
+  opacity: 0;
+}
+
+@starting-style {
+  .menu-card[open]::backdrop {
     opacity: 0;
   }
 }
