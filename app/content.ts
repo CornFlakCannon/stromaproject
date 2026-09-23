@@ -413,18 +413,19 @@ export const OPERE = {
              Morgan from the gallery's DSC00963, Noemi the one on the right in
              DSC09272). */
           cast: [
-            { name: "Mattia Dagli Orti", role: { it: "Regia, interprete", en: "Director, actor" }, photo: { src: "/people/cast/mattia.webp", width: 800, height: 800 } },
-            { name: "Alexandra Frabetti", role: { it: "Regia, interprete", en: "Director, actor" }, photo: { src: "/people/cast/alexandra.webp", width: 800, height: 800 } },
-            { name: "Morgan Bonanno", role: { it: "Interprete", en: "Actor" }, photo: { src: "/people/cast/morgan.webp", width: 800, height: 800 } },
-            { name: "Nicola Brescacin", role: { it: "Direzione della fotografia, operatore", en: "Director of photography, camera operator" }, photo: { src: "/people/cast/nicola.webp", width: 800, height: 800 } },
-            { name: "Ted Alushani", role: { it: "Sound design, microfonista", en: "Sound design, boom operator" }, photo: { src: "/people/cast/ted.webp", width: 800, height: 800 } },
-            { name: "Giovanni Barresi", role: { it: "Gaffer, operatore", en: "Gaffer, camera operator" }, photo: { src: "/people/cast/giovanni.webp", width: 800, height: 800 } },
-            { name: "Matilde Bosco", role: { it: "Segretaria di edizione", en: "Continuity supervisor" }, photo: { src: "/people/cast/matilde.webp", width: 800, height: 800 } },
-            { name: "Noemi Belluzzo", role: { it: "Segretaria di edizione, foto di backstage", en: "Continuity supervisor, backstage photography" }, photo: { src: "/people/cast/noemi.webp", width: 800, height: 800 } },
-            { name: "Andrea Berardi", role: { it: "Foto di backstage", en: "Backstage photography" }, photo: { src: "/people/cast/andrea.webp", width: 800, height: 800 } },
+            { name: "Mattia Dagli Orti", role: { it: "Director, actor", en: "Director, actor" }, photo: { src: "/people/cast/mattia.webp", width: 800, height: 800 } },
+            { name: "Alexandra Frabetti", role: { it: "Director, actor", en: "Director, actor" }, photo: { src: "/people/cast/alexandra.webp", width: 800, height: 800 } },
+            { name: "Morgan Bonanno", role: { it: "Actor", en: "Actor" }, photo: { src: "/people/cast/morgan.webp", width: 800, height: 800 } },
+            { name: "Nicola Brescacin", role: { it: "Director of photography, camera operator", en: "Director of photography, camera operator" }, photo: { src: "/people/cast/nicola.webp", width: 800, height: 800 } },
+            { name: "Ted Alushani", role: { it: "Sound design, boom operator", en: "Sound design, boom operator" }, photo: { src: "/people/cast/ted.webp", width: 800, height: 800 } },
+            { name: "Emma Berto", role: { it: "Additional gaffer", en: "Sound design, boom operator" }, photo: { src: "/people/cast/emma.webp", width: 800, height: 800 } },
+            { name: "Giovanni Barresi", role: { it: "Gaffer, camera operator", en: "Gaffer, camera operator" }, photo: { src: "/people/cast/giovanni.webp", width: 800, height: 800 } },
+            { name: "Matilde Bosco", role: { it: "Continuity supervisor", en: "Continuity supervisor" }, photo: { src: "/people/cast/matilde.webp", width: 800, height: 800 } },
+            { name: "Noemi Belluzzo", role: { it: "Continuity supervisor, backstage photography", en: "Continuity supervisor, backstage photography" }, photo: { src: "/people/cast/noemi.webp", width: 800, height: 800 } },
+            { name: "Andrea Berardi", role: { it: "Backstage photography", en: "Backstage photography" }, photo: { src: "/people/cast/andrea.webp", width: 800, height: 800 } },
             { name: "Lucia Meroni", role: { it: "Catering", en: "Catering" }, photo: { src: "/people/cast/lucia.webp", width: 800, height: 800 } },
             { name: "Sebastiano Scapinello", role: { it: "Microfonista aggiunto", en: "Additional boom operator" }, photo: { src: "/people/cast/sebastiano.webp", width: 800, height: 800 } },
-            { name: "Gianmarco Dolino", role: { it: "Microfonista aggiunto", en: "Additional boom operator" }, photo: { src: "/people/cast/gianmarco.webp", width: 800, height: 800 } },
+            { name: "Gianmarco Dolino", role: { it: "Additional boom operator", en: "Additional boom operator" }, photo: { src: "/people/cast/gianmarco.webp", width: 800, height: 800 } },
           ],
           /* From the set. The masters are in stroma_assets/BACKSTAGE/ (outside
              the repo), reduced to 1800px on the long side. */
