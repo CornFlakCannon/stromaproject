@@ -570,8 +570,8 @@ export const OPERE = {
           ],
           testi: [
             { title: { it: "Frammenti", en: "Fragments" }, items: FRAMMENTI },
-            { title: { it: "Racconti brevi", en: "Short stories" }, items: RACCONTI },
-            { title: { it: "Romanzi", en: "Novels" }, items: ROMANZI },
+            { title: { it: "Scritti in libertà", en: "Short stories" }, items: RACCONTI },
+            // { title: { it: "Romanzi", en: "Novels" }, items: ROMANZI },
           ],
         },
       ],
