@@ -446,7 +446,7 @@ export const OPERE = {
           /* TODO — il link del corto: `embed` con l'URL da incorporare
              (youtube-nocookie.com/embed/<id>, player.vimeo.com/video/<id>…).
              Finché manca, il player dice "Prossimamente". */
-          video: {},
+          video: { embed: "https://www.youtube-nocookie.com/embed/_TyAzsLyIlg?si=4_ojxuytJoEpaiew" },
           /* The faces are square crops in public/people/cast/, cut around the
              face with some air from the masters in stroma_assets/ (the two
              founders and Ted from the portraits already in public/people/,
