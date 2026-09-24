@@ -34,8 +34,8 @@ export const MENU = {
 
 export const HERO = {
   seed: {
-    it: "\"Ciò che costituisce la trama fondamentale o la matrice di sostegno di un organo, di un tessuto o di una cellula.\"",
-    en: "\"What constitutes the fundamental loom or the sustaining matrix of an organ, a tissue or a cell\"",
+    it: '"Ciò che costituisce la trama fondamentale o la matrice di sostegno di un organo, di un tessuto o di una cellula."',
+    en: '"What constitutes the fundamental loom or the sustaining matrix of an organ, a tissue or a cell"',
   } satisfies Copy,
   scroll: { it: "Scorri", en: "Scroll" } satisfies Copy,
 };
@@ -59,7 +59,7 @@ export const MANIFESTO = {
   },
   teaser_rest: {
     it: ", la trama del nostro organismo",
-    en: ", the loom of our organism"
+    en: ", the loom of our organism",
   },
   cta: { it: "Leggi il manifesto", en: "Read the manifesto" } satisfies Copy,
 };
@@ -128,8 +128,14 @@ export const CHI_SIAMO = {
         en: "The possibility of art hides in the author's ability to coincide with the chose medium.",
       },
       cv: [
-        {it: "Lettere Moderne e Scienze delle Religioni tracciano alcune tappe della mia formazione.", en: "'Lettere Moderne' e 'Scienze delle Religioni' tracciano alcune tappe della mia formazione."},
-        {it: "Eclettico autodidatta, accetto sfide che mi spingono al di fuori delle mie competenze coinvolgendo teatro, programmazione, matematica, arte visiva digitale, arte generativa.", en: "Eclettico autodidatta, accetto sfide che mi spingono al di fuori delle mie competenze coinvolgendo teatro, programmazione, matematica, arte visiva digitale, arte generativa."},
+        {
+          it: "Lettere Moderne e Scienze delle Religioni tracciano alcune tappe della mia formazione.",
+          en: "'Lettere Moderne' e 'Scienze delle Religioni' tracciano alcune tappe della mia formazione.",
+        },
+        {
+          it: "Eclettico autodidatta, accetto sfide che mi spingono al di fuori delle mie competenze coinvolgendo teatro, programmazione, matematica, arte visiva digitale, arte generativa.",
+          en: "Eclettico autodidatta, accetto sfide che mi spingono al di fuori delle mie competenze coinvolgendo teatro, programmazione, matematica, arte visiva digitale, arte generativa.",
+        },
       ],
     },
     {
@@ -142,9 +148,14 @@ export const CHI_SIAMO = {
         en: "I am wearing dark glasses today because I am seeing the future and it's looking very bright.",
       },
       cv: [
-        { it: "Psicologa di formazione, regista per vocazione, appassionata di politica, cinema e giustizia sociale.", en: "Psicologa di formazione, regista per vocazione, appassionata di politica, cinema e giustizia sociale." },
-        { it: "Amo navigare luoghi d'apprendimento inclusivi e creare enpowerment per comunità diversificate attraverso progetti collaborativi.", en: "Amo navigare luoghi d'apprendimento inclusivi e creare enpowerment per comunità diversificate attraverso progetti collaborativi." },
-        
+        {
+          it: "Psicologa di formazione, regista per vocazione, appassionata di politica, cinema e giustizia sociale.",
+          en: "Psicologa di formazione, regista per vocazione, appassionata di politica, cinema e giustizia sociale.",
+        },
+        {
+          it: "Amo navigare luoghi d'apprendimento inclusivi e creare enpowerment per comunità diversificate attraverso progetti collaborativi.",
+          en: "Amo navigare luoghi d'apprendimento inclusivi e creare enpowerment per comunità diversificate attraverso progetti collaborativi.",
+        },
       ],
     },
     /* Ted è fuori dalla lista per ora — da riaggiungere dopo una data futura,
@@ -196,22 +207,38 @@ export const GALLERIA = {
   photo: { it: "Foto", en: "Photo" } satisfies Copy,
   items: [
     { src: "/media/galleria/dsc00794.webp", width: 1800, height: 1200 },
-    { src: "/media/galleria/po-lines-3840x2160.webp", width: 1800, height: 1013 },
+    {
+      src: "/media/galleria/po-lines-3840x2160.webp",
+      width: 1800,
+      height: 1013,
+    },
     { src: "/media/galleria/dsc09144.webp", width: 1800, height: 1200 },
-    { src: "/media/galleria/colombari-rappresentazione.webp", width: 1600, height: 1314 },
+    {
+      src: "/media/galleria/colombari-rappresentazione.webp",
+      width: 1600,
+      height: 1314,
+    },
     { src: "/media/galleria/p1110721.webp", width: 1800, height: 1352 },
     { src: "/media/galleria/dsc00963.webp", width: 1800, height: 1200 },
     { src: "/media/galleria/dsc07902.webp", width: 1800, height: 1200 },
     { src: "/media/galleria/stroma2.webp", width: 996, height: 660 },
     { src: "/media/galleria/dsc09743.webp", width: 1800, height: 1200 },
     { src: "/media/galleria/dsc00324.webp", width: 1800, height: 1200 },
-    { src: "/media/galleria/po-lines-2160x3840.webp", width: 1013, height: 1800 },
+    {
+      src: "/media/galleria/po-lines-2160x3840.webp",
+      width: 1013,
+      height: 1800,
+    },
     { src: "/media/galleria/dsc09686.webp", width: 1800, height: 1200 },
     { src: "/media/galleria/dsc01016.webp", width: 1800, height: 1200 },
     { src: "/media/galleria/p1110820.webp", width: 1800, height: 1352 },
     { src: "/media/galleria/dsc09912.webp", width: 1800, height: 1200 },
     { src: "/media/galleria/dsc07679.webp", width: 1616, height: 1080 },
-    { src: "/media/galleria/po-lines-4320x7680.webp", width: 1013, height: 1800 },
+    {
+      src: "/media/galleria/po-lines-4320x7680.webp",
+      width: 1013,
+      height: 1800,
+    },
     { src: "/media/galleria/dsc00913.webp", width: 1800, height: 1200 },
   ] satisfies Photo[],
 };
@@ -301,7 +328,12 @@ export type Source = { src: string; type: string };
  * as the manifesto's plate), shown on a white sheet at the page's own
  * proportions. The caption names it; on the page it is the line under it.
  */
-export type Plate = { src: string; width: number; height: number; caption: Copy };
+export type Plate = {
+  src: string;
+  width: number;
+  height: number;
+  caption: Copy;
+};
 
 /** A block of a project's prose: a paragraph, a plate set between two, or a
  *  line quoted in the author's own voice, with the name it is quoted from. */
@@ -380,14 +412,22 @@ export const OPERE = {
       projects: [
         {
           slug: "i_giorni_della_vertigine",
-          title: { it: "I GIORNI DELLA VERTIGINE", en: "I GIORNI DELLA VERTIGINE" },
+          title: {
+            it: "I GIORNI DELLA VERTIGINE",
+            en: "I GIORNI DELLA VERTIGINE",
+          },
           author: "Alexandra Frabetti, Mattia Dagli Orti",
           meta: { it: "Cortometraggio", en: "Short film" },
           /* The poster, reduced from the 4320×7680 master (kept outside the
              repo) to a web size: next/image cuts the srcset from this. The
              grid card shows its foot: the title sits mid-poster and a centred
              crop cut through the lettering. */
-          cover: { src: "/media/vertigine-locandina.webp", width: 1600, height: 2844, position: "50% 100%" },
+          cover: {
+            src: "/media/vertigine-locandina.webp",
+            width: 1600,
+            height: 2844,
+            position: "50% 100%",
+          },
           body: [
             {
               it: "Quando ti sporgi dal quarto piano e guardi in basso una persona ha le stesse dimensioni di una formica. Ma la vertigine non è solo la nausea, le mani sudate pronte a mollare la presa da un istante all'altro... no, è una paura atavica: l'anticipazione della morte.",
@@ -395,7 +435,7 @@ export const OPERE = {
             },
             {
               it: "\"I giorni della Vertigine\" vuole svelare il volto nascosto della quotidianità, affrontando le diverse forme che la vertigine sa assumere. La prigionia ci pervade sin nel profondo, ci stringe all'interno di quattro piccole mura e, fuori, in mura infinitamente più grandi, quelle di un sistema alienante che racchiude tutti noi all'interno di loculi.",
-              en: "\"I giorni della Vertigine\" sets out to unveil the hidden face of everyday life, confronting the many forms vertigo can take. Captivity pervades us to the core: it holds us within four small walls and, outside, within walls infinitely larger, those of an alienating system that shuts each of us inside a burial niche.",
+              en: '"I giorni della Vertigine" sets out to unveil the hidden face of everyday life, confronting the many forms vertigo can take. Captivity pervades us to the core: it holds us within four small walls and, outside, within walls infinitely larger, those of an alienating system that shuts each of us inside a burial niche.',
             },
             { it: "Ogni fuga è vana.", en: "Every escape is in vain." },
             {
@@ -413,39 +453,218 @@ export const OPERE = {
              Morgan from the gallery's DSC00963, Noemi the one on the right in
              DSC09272). */
           cast: [
-            { name: "Mattia Dagli Orti", role: { it: "Director, actor", en: "Director, actor" }, photo: { src: "/people/cast/mattia.webp", width: 800, height: 800 } },
-            { name: "Alexandra Frabetti", role: { it: "Director, actor", en: "Director, actor" }, photo: { src: "/people/cast/alexandra.webp", width: 800, height: 800 } },
-            { name: "Morgan Bonanno", role: { it: "Actor", en: "Actor" }, photo: { src: "/people/cast/morgan.webp", width: 800, height: 800 } },
-            { name: "Nicola Brescacin", role: { it: "Director of photography, camera operator", en: "Director of photography, camera operator" }, photo: { src: "/people/cast/nicola.webp", width: 800, height: 800 } },
-            { name: "Ted Alushani", role: { it: "Sound design, boom operator", en: "Sound design, boom operator" }, photo: { src: "/people/cast/ted.webp", width: 800, height: 800 } },
-            { name: "Emma Berto", role: { it: "Additional gaffer", en: "Sound design, boom operator" }, photo: { src: "/people/cast/emma.webp", width: 800, height: 800 } },
-            { name: "Giovanni Barresi", role: { it: "Gaffer, camera operator", en: "Gaffer, camera operator" }, photo: { src: "/people/cast/giovanni.webp", width: 800, height: 800 } },
-            { name: "Matilde Bosco", role: { it: "Continuity supervisor", en: "Continuity supervisor" }, photo: { src: "/people/cast/matilde.webp", width: 800, height: 800 } },
-            { name: "Noemi Belluzzo", role: { it: "Continuity supervisor, backstage photography", en: "Continuity supervisor, backstage photography" }, photo: { src: "/people/cast/noemi.webp", width: 800, height: 800 } },
-            { name: "Andrea Berardi", role: { it: "Backstage photography", en: "Backstage photography" }, photo: { src: "/people/cast/andrea.webp", width: 800, height: 800 } },
-            { name: "Lucia Meroni", role: { it: "Catering", en: "Catering" }, photo: { src: "/people/cast/lucia.webp", width: 800, height: 800 } },
-            { name: "Sebastiano Scapinello", role: { it: "Microfonista aggiunto", en: "Additional boom operator" }, photo: { src: "/people/cast/sebastiano.webp", width: 800, height: 800 } },
-            { name: "Gianmarco Dolino", role: { it: "Additional boom operator", en: "Additional boom operator" }, photo: { src: "/people/cast/gianmarco.webp", width: 800, height: 800 } },
+            {
+              name: "Mattia Dagli Orti",
+              role: { it: "Director, actor", en: "Director, actor" },
+              photo: {
+                src: "/people/cast/mattia.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Alexandra Frabetti",
+              role: { it: "Director, actor", en: "Director, actor" },
+              photo: {
+                src: "/people/cast/alexandra.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Morgan Bonanno",
+              role: { it: "Actor", en: "Actor" },
+              photo: {
+                src: "/people/cast/morgan.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Nicola Brescacin",
+              role: {
+                it: "Director of photography, camera operator",
+                en: "Director of photography, camera operator",
+              },
+              photo: {
+                src: "/people/cast/nicola.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Ted Alushani",
+              role: {
+                it: "Sound design, boom operator",
+                en: "Sound design, boom operator",
+              },
+              photo: { src: "/people/cast/ted.webp", width: 800, height: 800 },
+            },
+            {
+              name: "Emma Berto",
+              role: {
+                it: "Additional gaffer",
+                en: "Sound design, boom operator",
+              },
+              photo: { src: "/people/cast/emma.webp", width: 800, height: 800 },
+            },
+            {
+              name: "Giovanni Barresi",
+              role: {
+                it: "Gaffer, camera operator",
+                en: "Gaffer, camera operator",
+              },
+              photo: {
+                src: "/people/cast/giovanni.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Matilde Bosco",
+              role: {
+                it: "Continuity supervisor",
+                en: "Continuity supervisor",
+              },
+              photo: {
+                src: "/people/cast/matilde.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Noemi Belluzzo",
+              role: {
+                it: "Continuity supervisor, backstage photography",
+                en: "Continuity supervisor, backstage photography",
+              },
+              photo: {
+                src: "/people/cast/noemi.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Andrea Berardi",
+              role: {
+                it: "Backstage photography",
+                en: "Backstage photography",
+              },
+              photo: {
+                src: "/people/cast/andrea.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Lucia Meroni",
+              role: { it: "Catering", en: "Catering" },
+              photo: {
+                src: "/people/cast/lucia.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Sebastiano Scapinello",
+              role: {
+                it: "Microfonista aggiunto",
+                en: "Additional boom operator",
+              },
+              photo: {
+                src: "/people/cast/sebastiano.webp",
+                width: 800,
+                height: 800,
+              },
+            },
+            {
+              name: "Gianmarco Dolino",
+              role: {
+                it: "Additional boom operator",
+                en: "Additional boom operator",
+              },
+              photo: {
+                src: "/people/cast/gianmarco.webp",
+                width: 800,
+                height: 800,
+              },
+            },
           ],
           /* From the set. The masters are in stroma_assets/BACKSTAGE/ (outside
              the repo), reduced to 1800px on the long side. */
           backstage: {
             title: { it: "Backstage", en: "Backstage" },
             items: [
-            { src: "/media/backstage/2025-06-01.webp", width: 1800, height: 855 },
-            { src: "/media/backstage/ad-carnem-redeo.webp", width: 1800, height: 1273 },
-            { src: "/media/backstage/dsc00642.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc00938.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc07640.webp", width: 1616, height: 1080 },
-            { src: "/media/backstage/dsc07684.webp", width: 1616, height: 1080 },
-            { src: "/media/backstage/dsc07838.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc09145.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc09163.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc09377.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc09875.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/dsc09938.webp", width: 1800, height: 1200 },
-            { src: "/media/backstage/p1110826.webp", width: 1800, height: 1352 },
-            { src: "/media/backstage/p1120036.webp", width: 1800, height: 1352 },
+              {
+                src: "/media/backstage/2025-06-01.webp",
+                width: 1800,
+                height: 855,
+              },
+              {
+                src: "/media/backstage/ad-carnem-redeo.webp",
+                width: 1800,
+                height: 1273,
+              },
+              {
+                src: "/media/backstage/dsc00642.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc00938.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc07640.webp",
+                width: 1616,
+                height: 1080,
+              },
+              {
+                src: "/media/backstage/dsc07684.webp",
+                width: 1616,
+                height: 1080,
+              },
+              {
+                src: "/media/backstage/dsc07838.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc09145.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc09163.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc09377.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc09875.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/dsc09938.webp",
+                width: 1800,
+                height: 1200,
+              },
+              {
+                src: "/media/backstage/p1110826.webp",
+                width: 1800,
+                height: 1352,
+              },
+              {
+                src: "/media/backstage/p1120036.webp",
+                width: 1800,
+                height: 1352,
+              },
             ],
           },
         },
@@ -464,7 +683,11 @@ export const OPERE = {
           /* The grid card only (see `leaves` on Project): one frame of TENEBRE
              at 2 s, cropped 4:3 around the eye and its black point at the
              clip's own pixels — the whole frame shrunk to a card went to mush. */
-          cover: { src: "/media/orrori/tenebre-eye.webp", width: 1000, height: 750 },
+          cover: {
+            src: "/media/orrori/tenebre-eye.webp",
+            width: 1000,
+            height: 750,
+          },
           /* TENEBRE as the trailer, the same clip the page closes on. */
           video: { sources: TENEBRE_SOURCES },
           body: [
@@ -477,19 +700,25 @@ export const OPERE = {
                 src: "/media/orrori/frammento-2.svg",
                 width: 595,
                 height: 842,
-                caption: { it: "Quando? — estratto da Frammenti di Orrori", en: "Quando? — from Frammenti di Orrori" },
+                caption: {
+                  it: "Quando? — estratto da Frammenti di Orrori",
+                  en: "Quando? — from Frammenti di Orrori",
+                },
               },
             },
             {
-              it: "L'esito è un linguaggio che si avviluppa attorno a sé stesso e si apre al contempo, riferendosi alle parole di cui è composto, alle lettere da cui sono composte le parole stesse e alla condizione umana del lettore. Così si pone, irrisolto, il problema grammatologico di un mondo come testo e una caduta di soggetto-oggetto tra lettore e testo letto, in un annientamento del \"Gegenstand\" come oggetto che sta contro il soggetto.",
-              en: "The outcome is a language that coils around itself and opens up at the same time, referring to the words it is made of, to the letters those words are made of, and to the human condition of the reader. So the grammatological problem of a world as text is posed, and left unresolved, together with a collapse of subject and object between the reader and the text being read, in an annihilation of the \"Gegenstand\" as the object that stands against the subject.",
+              it: 'L\'esito è un linguaggio che si avviluppa attorno a sé stesso e si apre al contempo, riferendosi alle parole di cui è composto, alle lettere da cui sono composte le parole stesse e alla condizione umana del lettore. Così si pone, irrisolto, il problema grammatologico di un mondo come testo e una caduta di soggetto-oggetto tra lettore e testo letto, in un annientamento del "Gegenstand" come oggetto che sta contro il soggetto.',
+              en: 'The outcome is a language that coils around itself and opens up at the same time, referring to the words it is made of, to the letters those words are made of, and to the human condition of the reader. So the grammatological problem of a world as text is posed, and left unresolved, together with a collapse of subject and object between the reader and the text being read, in an annihilation of the "Gegenstand" as the object that stands against the subject.',
             },
             {
               figure: {
                 src: "/media/orrori/frammento-1.svg",
                 width: 595,
                 height: 842,
-                caption: { it: "Chi? — estratto da Frammenti di Orrori", en: "Chi? — from Frammenti di Orrori" },
+                caption: {
+                  it: "Chi? — estratto da Frammenti di Orrori",
+                  en: "Chi? — from Frammenti di Orrori",
+                },
               },
             },
             {
@@ -507,20 +736,60 @@ export const OPERE = {
             title: { it: "Frammenti di Orrori", en: "Frammenti di Orrori" },
             intro: [
               {
-                it: "Frammenti di Orrori sono dei componimenti estratti dalla raccolta inedita \"Gli orrori\" di Mattia Dagli Orti. Si tratta di opere verbo-visive statiche e in movimento dove si esplorano le relazioni tra forme e linguaggio in esperimenti testuali dove il verso, le parole, l'io del lettore, vengono decostruiti e ricomposti in una catabasi dal sapore grammatologico ed esistenzialista.",
-                en: "Frammenti di Orrori are pieces drawn from the unpublished collection \"Gli orrori\" by Mattia Dagli Orti. They are verbo-visual works, still and in motion, exploring the relations between form and language in textual experiments where the verse, the words and the reader's I are taken apart and put back together in a katabasis of a grammatological and existentialist flavour.",
+                it: 'Frammenti di Orrori sono dei componimenti estratti dalla raccolta inedita "Gli orrori" di Mattia Dagli Orti. Si tratta di opere verbo-visive statiche e in movimento dove si esplorano le relazioni tra forme e linguaggio in esperimenti testuali dove il verso, le parole, l\'io del lettore, vengono decostruiti e ricomposti in una catabasi dal sapore grammatologico ed esistenzialista.',
+                en: 'Frammenti di Orrori are pieces drawn from the unpublished collection "Gli orrori" by Mattia Dagli Orti. They are verbo-visual works, still and in motion, exploring the relations between form and language in textual experiments where the verse, the words and the reader\'s I are taken apart and put back together in a katabasis of a grammatological and existentialist flavour.',
               },
             ],
             /* The questions first, in the order one asks them; then the rest. */
             items: [
-              { src: "/media/orrori/frammento-1.svg", width: 595, height: 842, caption: { it: "Chi?", en: "Chi?" } },
-              { src: "/media/orrori/frammento-2.svg", width: 595, height: 842, caption: { it: "Quando?", en: "Quando?" } },
-              { src: "/media/orrori/dove.svg", width: 595, height: 842, caption: { it: "Dove?", en: "Dove?" } },
-              { src: "/media/orrori/come.svg", width: 595, height: 842, caption: { it: "Come?", en: "Come?" } },
-              { src: "/media/orrori/perche.svg", width: 595, height: 842, caption: { it: "Perché?", en: "Perché?" } },
-              { src: "/media/orrori/quattro-morti.svg", width: 595, height: 842, caption: { it: "Quattro morti", en: "Quattro morti" } },
-              { src: "/media/orrori/frammento-3.svg", width: 595, height: 842, caption: { it: "Stroma", en: "Stroma" } },
-              { src: "/media/orrori/frammento-4.svg", width: 595, height: 842, caption: { it: "Frammento IV", en: "Fragment IV" } },
+              {
+                src: "/media/orrori/frammento-1.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Chi?", en: "Chi?" },
+              },
+              {
+                src: "/media/orrori/frammento-2.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Quando?", en: "Quando?" },
+              },
+              {
+                src: "/media/orrori/dove.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Dove?", en: "Dove?" },
+              },
+              {
+                src: "/media/orrori/come.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Come?", en: "Come?" },
+              },
+              {
+                src: "/media/orrori/perche.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Perché?", en: "Perché?" },
+              },
+              {
+                src: "/media/orrori/quattro-morti.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Quattro morti", en: "Quattro morti" },
+              },
+              {
+                src: "/media/orrori/frammento-3.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Stroma", en: "Stroma" },
+              },
+              {
+                src: "/media/orrori/frammento-4.svg",
+                width: 595,
+                height: 842,
+                caption: { it: "Frammento IV", en: "Fragment IV" },
+              },
             ],
           },
           coda: {
@@ -550,7 +819,7 @@ export const OPERE = {
             },
             {
               it: "I temi vanno dalla domanda sulla possibilità della poesia oggi alla meditazione sulla morte, rimandi che accomunano questa ricerca alle sperimentazioni verbo-visuali con cui si contendono il posto all'interno della raccolta inedita \"Frammenti d'Orrori\".",
-              en: "The themes run from the question of whether poetry is possible today to a meditation on death — echoes this research shares with the verbo-visual experiments it vies with for a place in the unpublished collection \"Frammenti d'Orrori\".",
+              en: 'The themes run from the question of whether poetry is possible today to a meditation on death — echoes this research shares with the verbo-visual experiments it vies with for a place in the unpublished collection "Frammenti d\'Orrori".',
             },
           ],
           testi: [{ items: POESIE }],
@@ -560,17 +829,23 @@ export const OPERE = {
           title: { it: "Prosa", en: "Prose" },
           author: "Mattia Dagli Orti",
           /* TODO — copy definitiva della riga sotto il titolo. */
-          meta: { it: "Frammenti, racconti e romanzi", en: "Fragments, short stories and novels" },
+          meta: {
+            it: "Scritti in libertà",
+            en: "Fragments, short stories and novels",
+          },
           /* TODO — l'introduzione della sezione, da scrivere. */
           body: [
             {
-              it: "TODO — l'introduzione alla prosa, in due o tre righe.",
-              en: "TODO — the introduction to the prose, in two or three lines.",
+              it: 'Rispetto ai "Frammenti d\'Orrori", dal registro strettamente poetico, gli "Scritti in Libertà" offrono una serie di episodi, scorci nuovamente frammentati, nella contemplazione attiva di una scrittura svincolata dal verso e dalla metrica, ma non per questo scevra dai toni esistenzialisti e dalla problematizzazione del linguaggio.',
+              en: 'From the "Frammenti d\'Orrori", chanted through a poetic voice, "Writings in freedom" offers a series of episodes, sights over a fragmented landscape in the active contemplation of a writing free of metric and verses, but still dense with existentialist tones and the linguistic problem.',
             },
           ],
           testi: [
             { title: { it: "Frammenti", en: "Fragments" }, items: FRAMMENTI },
-            { title: { it: "Scritti in libertà", en: "Short stories" }, items: RACCONTI },
+            {
+              title: { it: "Scritti in libertà", en: "Short stories" },
+              items: RACCONTI,
+            },
             // { title: { it: "Romanzi", en: "Novels" }, items: ROMANZI },
           ],
         },
@@ -608,13 +883,18 @@ export function findProject(
   // Widened on purpose: `satisfies` keeps each category's literal shape, and
   // the optional fields only some projects carry would otherwise vanish from
   // the union the page reads.
-  const category: Category | undefined = OPERE.categories.find((c) => c.slug === categoria);
+  const category: Category | undefined = OPERE.categories.find(
+    (c) => c.slug === categoria,
+  );
   const project = category?.projects.find((p) => p.slug === slug);
   return category && project ? { category, project } : null;
 }
 
 export const CONTATTO = {
-  eyebrow: { it: "Facci sentire chi sei", en: "Let us hear who you are" } satisfies Copy,
+  eyebrow: {
+    it: "Facci sentire chi sei",
+    en: "Let us hear who you are",
+  } satisfies Copy,
   headline: [
     { it: "Costruiamo", en: "Let's build" },
     { it: "un organo", en: "a new organ" },
