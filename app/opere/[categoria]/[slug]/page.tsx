@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { GALLERIA, OPERE, findProject, type Block } from "@/app/content";
 import Back from "@/app/components/Back";
 import CastStrip from "@/app/components/CastStrip";
+import EmbedPlayer from "@/app/components/EmbedPlayer";
 import Leaves from "@/app/components/Leaves";
 import LoopVideo from "@/app/components/LoopVideo";
 import PlateFigure from "@/app/components/PlateFigure";
@@ -175,9 +176,8 @@ export default async function ProjectPage({
         {/* The player. The frame is reserved by `video` being there at all; what
             fills it may still be missing, in which case the frame says so
             rather than standing empty. A clip of our own plays in a <video> on
-            a loop; a link plays in a bare <iframe> with the platform's own
-            embed URL — YouTube, Vimeo and the rest all speak that, and nothing
-            here knows which one it is talking to. */}
+            a loop; a link plays in an <iframe> with the platform's own embed
+            URL, loaded only once the visitor presses play (see EmbedPlayer). */}
         {project.video && (
           <figure className="mt-[4svh] aspect-video w-full border border-bone/15 bg-ink">
             {project.video.sources ? (
@@ -186,15 +186,7 @@ export default async function ProjectPage({
                 className="h-full w-full object-cover"
               />
             ) : project.video.embed ? (
-              <iframe
-                src={project.video.embed}
-                title={project.title.it}
-                loading="lazy"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-                className="h-full w-full"
-              />
+              <EmbedPlayer embed={project.video.embed} title={project.title.it} />
             ) : (
               <div className="t-meta flex h-full w-full items-center justify-center text-bone/40">
                 <T c={OPERE.soon} />

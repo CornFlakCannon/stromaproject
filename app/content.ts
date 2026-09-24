@@ -390,6 +390,13 @@ export const OPERE = {
   toWorks: { it: "Torna alle opere", en: "Back to works" } satisfies Copy,
   /** What the reserved player says while a project's `video.embed` is missing. */
   soon: { it: "Prossimamente", en: "Coming soon" } satisfies Copy,
+  /** The button over an embedded film, and the line under it naming who it
+   *  loads from ({p}) — nothing is fetched from there until it is pressed. */
+  play: { it: "Guarda il film", en: "Watch the film" } satisfies Copy,
+  playNote: {
+    it: "Il video viene caricato da {p}, che potrebbe raccogliere dati sulla tua visita.",
+    en: "The video loads from {p}, which may collect data about your visit.",
+  } satisfies Copy,
   /** The eyebrow over a project's strip of faces. */
   cast: { it: "Cast", en: "Cast" } satisfies Copy,
   /** The two arrows of a pager — the leaves' reader (components/Leaves) and
@@ -446,7 +453,7 @@ export const OPERE = {
           /* TODO — il link del corto: `embed` con l'URL da incorporare
              (youtube-nocookie.com/embed/<id>, player.vimeo.com/video/<id>…).
              Finché manca, il player dice "Prossimamente". */
-          video: { embed: "https://www.youtube-nocookie.com/embed/_TyAzsLyIlg?si=4_ojxuytJoEpaiew" },
+          video: { embed: "https://www.youtube-nocookie.com/embed/_TyAzsLyIlg" },
           /* The faces are square crops in public/people/cast/, cut around the
              face with some air from the masters in stroma_assets/ (the two
              founders and Ted from the portraits already in public/people/,
