@@ -149,12 +149,12 @@ export const CHI_SIAMO = {
       },
       cv: [
         {
-          it: "Psicologa di formazione, regista per vocazione, appassionata di politica, cinema e giustizia sociale.",
+          it: "Psicologa di formazione, regista per provocazione, appassionata di politica, cinema e rapporti di potere.",
           en: "Psicologa di formazione, regista per vocazione, appassionata di politica, cinema e giustizia sociale.",
         },
         {
-          it: "Amo navigare luoghi d'apprendimento inclusivi e creare enpowerment per comunità diversificate attraverso progetti collaborativi.",
-          en: "Amo navigare luoghi d'apprendimento inclusivi e creare enpowerment per comunità diversificate attraverso progetti collaborativi.",
+          it: "Mi piace stare in bilico tra l'immaginario e il reale, in un percorso che fa incontrare teatro, cinema, arti pittoriche, lasciando spazio alla sperimentazione.",
+          en: "I like to stand between the imaginary and the real, travelling along a path that unites theater, cinema, painting, leaving space for experimentation",
         },
       ],
     },
@@ -208,15 +208,15 @@ export const GALLERIA = {
   items: [
     { src: "/media/galleria/dsc00794.webp", width: 1800, height: 1200 },
     {
-      src: "/media/galleria/po-lines-3840x2160.webp",
-      width: 1800,
-      height: 1013,
-    },
-    { src: "/media/galleria/dsc09144.webp", width: 1800, height: 1200 },
-    {
       src: "/media/galleria/colombari-rappresentazione.webp",
       width: 1600,
       height: 1314,
+    },
+    { src: "/media/galleria/dsc09144.webp", width: 1800, height: 1200 },
+    {
+      src: "/media/galleria/po-lines-3840x2160.webp",
+      width: 1800,
+      height: 1013,
     },
     { src: "/media/galleria/p1110721.webp", width: 1800, height: 1352 },
     { src: "/media/galleria/dsc00963.webp", width: 1800, height: 1200 },
@@ -437,23 +437,23 @@ export const OPERE = {
           },
           body: [
             {
-              it: "Quando ti sporgi dal quarto piano e guardi in basso una persona ha le stesse dimensioni di una formica. Ma la vertigine non è solo la nausea, le mani sudate pronte a mollare la presa da un istante all'altro... no, è una paura atavica: l'anticipazione della morte.",
+              it: "Quando ti sporgi dal quarto piano e guardi in basso una persona ha le stesse dimensioni di una formica. La vertigine non è solo la nausea, le mani sudate pronte a mollare la presa da un istante all'altro... è una paura atavica: il pre-sentimento della morte.",
               en: "Lean out from the fourth floor and look down: a person is the size of an ant. But vertigo is not only the nausea, the sweating hands ready to lose their grip from one moment to the next... no, it is an ancestral fear: the anticipation of death.",
             },
             {
-              it: "\"I giorni della Vertigine\" vuole svelare il volto nascosto della quotidianità, affrontando le diverse forme che la vertigine sa assumere. La prigionia ci pervade sin nel profondo, ci stringe all'interno di quattro piccole mura e, fuori, in mura infinitamente più grandi, quelle di un sistema alienante che racchiude tutti noi all'interno di loculi.",
+              it: "\"I giorni della Vertigine\" vuole affrontare le diverse forme che la vertigine sa assumere anche nella quotidiana esistenza di ciascuno. La prigionia ci pervade sin nel profondo, ci stringe all'interno di quattro piccole mura e, fuori, in mura infinitamente più grandi, quelle di un sistema alienante che racchiude tutti noi all'interno di loculi sospesi sul vuoto d'una facile caduta.",
               en: '"I giorni della Vertigine" sets out to unveil the hidden face of everyday life, confronting the many forms vertigo can take. Captivity pervades us to the core: it holds us within four small walls and, outside, within walls infinitely larger, those of an alienating system that shuts each of us inside a burial niche.',
             },
             { it: "Ogni fuga è vana.", en: "Every escape is in vain." },
             {
-              it: "Non ha importanza il luogo o il tempo, questa è una condizione che attanaglia tutti indistintamente. Abbiamo scelto le Colombare come simbolo di questo male che noi stessi viviamo in prima persona.",
-              en: "Place and time make no difference: this is a condition that grips everyone alike. We chose the Colombare, the columbaria, as the symbol of an ailment we ourselves live through first-hand.",
+              it: "Le Colombare, le tombe dei vivi, si ergono a simbolo di questo male che noi stessi viviamo in prima persona.",
+              en: "The Colombare, the columbaria, stand as a symbol of an ailment we ourselves live through first-hand.",
             },
           ],
           /* TODO — il link del corto: `embed` con l'URL da incorporare
              (youtube-nocookie.com/embed/<id>, player.vimeo.com/video/<id>…).
              Finché manca, il player dice "Prossimamente". */
-          video: { embed: "https://www.youtube-nocookie.com/embed/_TyAzsLyIlg" },
+          video: { embed: "https://www.youtube-nocookie.com/embed/sMHHaf3W6Hg?si=DaqWtT1jDu0EFC4f" },
           /* The faces are square crops in public/people/cast/, cut around the
              face with some air from the masters in stroma_assets/ (the two
              founders and Ted from the portraits already in public/people/,
