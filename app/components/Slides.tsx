@@ -1,13 +1,11 @@
 "use client";
 
-import { useId, useLayoutEffect, useRef, type KeyboardEvent, type PointerEvent } from "react";
+import { useId, useLayoutEffect, useRef, type KeyboardEvent } from "react";
 import Image from "next/image";
 import { OPERE, type Copy, type Photo } from "@/app/content";
+import { useSwipe } from "@/app/lib/useSwipe";
 import { Arrow, arrowButton } from "./Arrow";
 import { T } from "./T";
-
-/** Finger travel (px) that counts as a swipe rather than a tap. */
-const SWIPE_PX = 60;
 
 /**
  * Photographs, one at a time: the landing's gallery and a project's backstage
@@ -38,7 +36,8 @@ const SWIPE_PX = 60;
  *
  * Input is scoped to the player, never to the window, for the reasons
  * components/Leaves gives: Left/Right and Home/End turn photos while the focus
- * is inside, the arrows do the rest. A horizontal swipe turns them on touch
+ * is inside, the arrows do the rest. A horizontal swipe (app/lib/useSwipe: strict,
+ * so a scroll that drifts sideways never turns a photo) turns them on touch
  * where the page's own scroll does not claim the finger first — on a project
  * page it does not; on the landing ScrollShell captures every pointer, so there
  * the arrows are the whole control.
@@ -102,17 +101,7 @@ export default function Slides({ items, label }: { items: Photo[]; label: Copy }
     show(to);
   };
 
-  const from = useRef<number | null>(null);
-  const onDown = (e: PointerEvent) => {
-    if (e.pointerType === "mouse") return;
-    from.current = e.clientX;
-  };
-  const onUp = (e: PointerEvent) => {
-    if (from.current === null) return;
-    const travel = from.current - e.clientX;
-    from.current = null;
-    if (Math.abs(travel) >= SWIPE_PX) show(at.current + (travel > 0 ? 1 : -1));
-  };
+  const swipe = useSwipe((dir) => show(at.current + dir));
 
   const arrow = `${arrowButton} absolute top-1/2 z-10 size-[12vw] -translate-y-1/2 md:size-[3.6vw]`;
 
@@ -127,10 +116,8 @@ export default function Slides({ items, label }: { items: Photo[]; label: Copy }
       <div className="relative">
         {/* The window: as wide as the player, clipping the track. */}
         <div
-          onPointerDown={onDown}
-          onPointerUp={onUp}
-          onPointerCancel={onUp}
-          className="relative w-full overflow-hidden [touch-action:pan-y]"
+          {...swipe}
+          className="relative w-full overflow-hidden [touch-action:pan-y_pinch-zoom]"
         >
           <div className="slides-track relative left-1/2 flex w-max gap-[3vw] md:gap-[1.6vw]">
             {items.map((ph, i) => (

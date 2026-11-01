@@ -75,6 +75,9 @@ export const MANIFESTO = {
 export const MANIFESTO_PAGE = {
   image: {
     src: "/MANIFESTION.svg",
+    /** The SVG's viewBox (mm ×100): its shape, for the zoomable card. */
+    width: 19673,
+    height: 13793,
     /** What a screen reader gets instead of the picture. */
     alt: {
       it: "Il manifesto di STROMA, composto a mano su una tavola.",

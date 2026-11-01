@@ -403,6 +403,18 @@ dialog[data-aside]::backdrop {
   background: transparent;
 }
 
+/* A picture zoomed in its own box (components/useZoomPan) — the manifesto card,
+   LeafLightbox. While one is open the browser's pinch is taken away from the
+   whole page, not just the dialog: a pinch that lands on the backdrop beside
+   the card would otherwise zoom the visual viewport, and on the landing, whose
+   ScrollShell is `touch-action: none`, nobody could pinch back out once the
+   card closed. Inside the card the gestures are ours. */
+html:has(dialog.zoom-dialog[open]),
+html:has(dialog.zoom-dialog[open]) body,
+dialog.zoom-dialog {
+  touch-action: none;
+}
+
 /* ---------------------------------------------------------------------------
    THE TEXT READER — TestoDialog. The text does not scroll, it spills: with
    `column-fill: auto` and a fixed height each column fills to the bottom and

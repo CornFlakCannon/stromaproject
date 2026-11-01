@@ -5,18 +5,16 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
-  type PointerEvent,
 } from "react";
 import Image from "next/image";
 import { OPERE, type Plate } from "@/app/content";
+import { useSwipe } from "@/app/lib/useSwipe";
 import { Arrow, arrowButton } from "./Arrow";
 import LeafLightbox from "./LeafLightbox";
 import { T } from "./T";
 
 /** How long a page turn takes. */
 const TURN_MS = 620;
-/** Finger travel (px) that counts as a swipe rather than a tap. */
-const SWIPE_PX = 60;
 /** How far (% of its own width) the sheet slides out before the next slides in. */
 const SLIDE_PCT = 20;
 
@@ -37,8 +35,11 @@ const SLIDE_PCT = 20;
  * Input is scoped to the reader, never to the window: the page scrolls on the
  * browser's own scroll, so a global key handler would steal the arrows from
  * it. Left/Right and Home/End turn pages while the focus is inside; a
- * horizontal swipe turns them on touch (the sheet keeps `pan-y`, so a vertical
- * drag still scrolls the page); the two arrows beside the sheet do the rest.
+ * horizontal swipe turns them on touch — strict (app/lib/useSwipe): mostly
+ * sideways, one finger, and dropped whenever the browser claims the gesture,
+ * so a scroll that starts on the sheet never turns it. The sheet keeps
+ * `pan-y pinch-zoom`: a vertical drag scrolls the page, a pinch zooms it. The
+ * two arrows beside the sheet do the rest.
  * A click on the sheet itself opens that leaf full screen (LeafLightbox).
  */
 export default function Leaves({ items }: { items: Plate[] }) {
@@ -99,17 +100,7 @@ export default function Leaves({ items }: { items: Plate[] }) {
     goTo(to);
   };
 
-  const from = useRef<number | null>(null);
-  const onDown = (e: PointerEvent) => {
-    if (e.pointerType === "mouse") return;
-    from.current = e.clientX;
-  };
-  const onUp = (e: PointerEvent) => {
-    if (from.current === null) return;
-    const travel = from.current - e.clientX;
-    from.current = null;
-    if (Math.abs(travel) >= SWIPE_PX) goTo(page + (travel > 0 ? 1 : -1));
-  };
+  const swipe = useSwipe((dir) => goTo(page + dir));
 
   const leaf = items[page];
 
@@ -133,10 +124,8 @@ export default function Leaves({ items }: { items: Plate[] }) {
           <div className="relative">
             <div
               ref={sheet}
-              onPointerDown={onDown}
-              onPointerUp={onUp}
-              onPointerCancel={onUp}
-              className="[touch-action:pan-y] [will-change:transform]"
+              {...swipe}
+              className="[touch-action:pan-y_pinch-zoom] [will-change:transform]"
             >
               {/* A white sheet — white, not bone: the plates carry their own
                   white and a bone sheet showed as a frame around it — at the
