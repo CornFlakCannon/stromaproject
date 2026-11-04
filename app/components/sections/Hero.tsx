@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { BUDGET, SDiv, Section, PERIOD } from "@/app/scrollkit";
 import { HERO } from "@/app/content";
 import { T } from "../T";
@@ -8,8 +9,8 @@ import { breathe, heroExit, heroExitSoft } from "./motion";
 const SPAN = BUDGET.quick + BUDGET.instant; // 1100 — long enough to feel like a departure
 
 /**
- * The thesis: the word itself, at the size the concept board set, bleeding off
- * the left edge. Nothing here enters on scroll — the hero has to exist before
+ * The thesis: the word itself, as the textured logo, bleeding off the left
+ * edge. Nothing here enters on scroll — the hero has to exist before
  * a wheel is touched — so it arrives with a CSS load-in and *leaves* on scroll.
  */
 export default function Hero({ index }: { index: number }) {
@@ -19,13 +20,19 @@ export default function Hero({ index }: { index: number }) {
     // scrollkit/core/sections.ts. Safe at 0 here: index 0, and no snap span to strand in.
     <Section index={index} end={SPAN} landing={0}>
       <div className="relative z-10 flex min-h-[100dvh] flex-col justify-end gap-[4svh] px-5 pb-8 pt-20 md:justify-center md:gap-[6svh] md:px-8 md:pb-10 md:pt-24">
-        {/* Bled a hair off the left margin, the way the concept board crops it. */}
+        {/* Bled a hair off the left margin, the way the concept board crops it.
+            As wide as the set word was; the svh cap keeps its taller letters
+            from pushing the quote off a short screen. */}
         <SDiv budget={SPAN} anim={heroExit} className="-ml-[1.4vw] select-none">
-          <h1 className="t-cubital text-[26vw] text-viola md:text-[16vw]">
-            <span className="enter block">Stro</span>
-            <span className="enter block" style={{ animationDelay: "140ms" }}>
-              Ma
-            </span>
+          <h1 className="enter w-[min(93vw,83svh)] md:w-[min(57vw,83svh)]">
+            <Image
+              src="/media/stroma-logo.webp"
+              width={1800}
+              height={1189}
+              alt="STROMA"
+              preload
+              className="h-auto w-full"
+            />
           </h1>
         </SDiv>
 
