@@ -309,7 +309,9 @@ export default function StromaCanvas() {
     // Camera-relative view bounds, padded by the widest stroke so a hairline
     // whose box is just outside does not vanish while its stroke would show.
     const pad = (MAX_WIDTH / 2 + 2) / scale;
-    const halfW = W / (2 * scale) + pad;
+    // From W2 rather than W/2, as in lib/tissueGl.ts — see `focusX`.
+    const left = p.W2 / scale + pad;
+    const right = (W - p.W2) / scale + pad;
     // The band, not the viewport: screen y = Hf + y1·scale, inverted. An edge
     // wholly outside the band would be built, stroked and then thrown away by the
     // caller's clip — and over the violet panel that was half of every frame.
@@ -332,7 +334,8 @@ export default function StromaCanvas() {
     // The band WITHOUT the padding: an edge whose box sits inside it has nothing
     // to trim, and is spared the per-piece tests below. That is every edge in the
     // final pull-back, which is the most edges the page ever draws.
-    const inW = W / (2 * scale);
+    const inL = p.W2 / scale;
+    const inR = (W - p.W2) / scale;
     const inUp = (p.Hf - bandTop) / scale;
     const inDn = (bandBot - p.Hf) / scale;
 
@@ -356,7 +359,7 @@ export default function StromaCanvas() {
 
       const x1Lo = rxLo * p.cyaw + (sPos ? rzLo : rzHi) * p.syaw;
       const x1Hi = rxHi * p.cyaw + (sPos ? rzHi : rzLo) * p.syaw;
-      if (x1Hi < -halfW || x1Lo > halfW) continue;
+      if (x1Hi < -left || x1Lo > right) continue;
 
       const y1Lo = ryLo * p.cpit + (aPos ? rxLo : rxHi) * A + (bPos ? rzLo : rzHi) * B;
       const y1Hi = ryHi * p.cpit + (aPos ? rxHi : rxLo) * A + (bPos ? rzHi : rzLo) * B;
@@ -370,7 +373,7 @@ export default function StromaCanvas() {
       const l = lod * LOD_MUL[e.style];
       if (e.maxX - e.minX < l && e.maxY - e.minY < l) continue;
 
-      cut[i] = x1Lo < -inW || x1Hi > inW || y1Lo < -inUp || y1Hi > inDn ? 1 : 0;
+      cut[i] = x1Lo < -inL || x1Hi > inR || y1Lo < -inUp || y1Hi > inDn ? 1 : 0;
 
       const b = e.band * STYLES + e.style;
       idx[n] = i;

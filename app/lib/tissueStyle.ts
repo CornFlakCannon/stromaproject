@@ -191,7 +191,16 @@ export const VIOLA_RGB = [96 / 255, 57 / 255, 255 / 255] as const;
 export const CARBON_RGB = [5 / 255, 5 / 255, 5 / 255] as const;
 
 export type Frame = { x: number; y: number; logS: number; focus: number };
-export type Camera = Frame & { yaw: number; pitch: number };
+export type Camera = Frame & {
+  yaw: number;
+  pitch: number;
+  /** Where the camera's point sits ACROSS the screen, as a fraction of its
+   *  width — `focus`'s horizontal twin, 0.5 when unset. The page never sets it.
+   *  The post studio does, to cut one wide picture into carousel slides: slide
+   *  i of n is the same camera with `focusX = n/2 - i`, which is exact because
+   *  the projection is affine. */
+  focusX?: number;
+};
 
 /**
  * World → screen, orthographic, rotated about the camera's focus point.
@@ -200,7 +209,7 @@ export type Camera = Frame & { yaw: number; pitch: number };
  *     x1 =  rx·cosYaw + rz·sinYaw
  *     z1 = -rx·sinYaw + rz·cosYaw
  *     y1 =  ry·cosPitch - z1·sinPitch
- *     sx = W/2 + x1·scale ;  sy = H·focus + y1·scale
+ *     sx = W·focusX + x1·scale ;  sy = H·focus + y1·scale
  *
  * ORTHOGRAPHIC on purpose. Points at different z still shear sideways by
  * `z·sinYaw`, which *is* the parallax; and because the map stays affine, a point
@@ -227,7 +236,7 @@ export const mkProj = (c: Camera, W: number, H: number): Proj => ({
   syaw: Math.sin(c.yaw),
   cpit: Math.cos(c.pitch),
   spit: Math.sin(c.pitch),
-  W2: W / 2,
+  W2: W * (c.focusX ?? 0.5),
   Hf: H * c.focus,
 });
 

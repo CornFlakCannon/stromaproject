@@ -524,7 +524,10 @@ export function createTissueGl(
     // and the shader applies the LOD and growth gates per instance, so being
     // conservative costs vertices and can never cost pixels.
     const pad = (MAX_WIDTH / 2 + 2) / scale;
-    const halfW = W / (2 * scale) + pad;
+    // Measured from W2, not W/2: a carousel slide puts the camera's point
+    // off-centre, or past the slide's edge altogether (see `focusX`).
+    const left = p.W2 / scale + pad;
+    const right = (W - p.W2) / scale + pad;
     const up = p.Hf / scale + pad;
     const dn = (H - p.Hf) / scale + pad;
     const lod = LOD_PX / scale;
@@ -550,7 +553,7 @@ export function createTissueGl(
         const rxHi = e.maxX - p.cx;
         const x1Lo = rxLo * p.cyaw + (sPos ? e.minZ : e.maxZ) * p.syaw;
         const x1Hi = rxHi * p.cyaw + (sPos ? e.maxZ : e.minZ) * p.syaw;
-        if (x1Hi < -halfW || x1Lo > halfW) continue;
+        if (x1Hi < -left || x1Lo > right) continue;
         const y1Lo = (e.minY - p.cy) * p.cpit + (aPos ? rxLo : rxHi) * A + (bPos ? e.minZ : e.maxZ) * B;
         const y1Hi = (e.maxY - p.cy) * p.cpit + (aPos ? rxHi : rxLo) * A + (bPos ? e.maxZ : e.minZ) * B;
         if (y1Hi < -up || y1Lo > dn) continue;
