@@ -16,6 +16,7 @@ const INITIAL: Settings = {
   sealed: false,
   growth: 0.3,
   thick: 1,
+  veil: 0,
 };
 
 type Shot = { file: File; url: string };
@@ -142,6 +143,12 @@ export default function Studio() {
         className="relative min-h-0 flex-1 cursor-grab touch-none select-none overflow-hidden active:cursor-grabbing"
       >
         <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
+        {/* The veil: the ground's own colour over the tissue — the export lays
+            the same layer, at the same opacity. */}
+        <div
+          className={`pointer-events-none absolute inset-0 ${s.invert ? "bg-viola" : "bg-carbon"}`}
+          style={{ opacity: s.veil }}
+        />
         {/* The crop. Its shadow dims everything outside it; placed by the engine. */}
         <div
           ref={frameEl}
@@ -240,6 +247,15 @@ export default function Studio() {
           step={0.05}
           value={s.thick}
           onChange={(v) => up({ thick: v })}
+        />
+        <Slider
+          label="Velo per il testo"
+          shown={`${Math.round(s.veil * 100)}%`}
+          min={0}
+          max={0.95}
+          step={0.01}
+          value={s.veil}
+          onChange={(v) => up({ veil: v })}
         />
 
         <Group label="Inquadra">

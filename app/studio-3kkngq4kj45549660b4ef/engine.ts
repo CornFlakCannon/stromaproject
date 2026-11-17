@@ -26,7 +26,7 @@
 
 import { growOrganism, spineAt, type Organism } from "@/app/lib/tree";
 import { createTissueGl, type TissueGl } from "@/app/lib/tissueGl";
-import type { Camera } from "@/app/lib/tissueStyle";
+import { VIOLA_SOLID, type Camera } from "@/app/lib/tissueStyle";
 
 export type Format = { id: string; label: string; ratio: string; w: number; h: number };
 
@@ -56,6 +56,9 @@ export type Settings = {
   growth: number;
   /** Line weight against the frame. 1 is the site on a phone. */
   thick: number;
+  /** Opacity of a flat layer of the ground's own colour laid over the tissue,
+   *  0 → 1: it pushes the background back so type on top of the post reads. */
+  veil: number;
 };
 
 export type Framing = "discesa" | "tutto" | "dritto";
@@ -387,6 +390,15 @@ export function createStudio(
           ctx.fillStyle = CARBON;
           ctx.fillRect(0, 0, f.w, f.h);
           ctx.drawImage(ex.c, 0, 0);
+          // The veil, in the ground's colour. The preview lays the same flat
+          // colour over its canvas with CSS opacity — the same source-over —
+          // so what is seen there is what is saved here.
+          if (s.veil > 0) {
+            ctx.globalAlpha = s.veil;
+            ctx.fillStyle = s.invert ? VIOLA_SOLID : CARBON;
+            ctx.fillRect(0, 0, f.w, f.h);
+            ctx.globalAlpha = 1;
+          }
           const blob = await new Promise<Blob | null>((r) => out.toBlob(r, "image/png"));
           if (!blob) throw new Error("Impossibile creare il PNG");
           blobs.push(blob);
