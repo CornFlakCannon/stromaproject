@@ -273,7 +273,7 @@ export type Project = {
    * or whatever another platform hands out as its embed address. `sources`
    * instead is a clip served from public/, in the order the browser should try
    * them, played muted on a loop — a trailer. Until one of the two is filled
-   * the page holds the space and says so.
+   * the page says the film is coming, in one line where the player will be.
    */
   video?: { embed?: string; sources?: Source[] };
   /** Who made it, shown as a strip of faces under the text. */
@@ -384,7 +384,8 @@ export const OPERE = {
    *  same discipline open (`/#opere/<categoria>`, see app/lib/opereHash.ts),
    *  so it promises the section it actually lands on. */
   toWorks: { it: "Torna alle opere", en: "Back to works" } satisfies Copy,
-  /** What the reserved player says while a project's `video.embed` is missing. */
+  /** What a project's page says in place of the player while `video` carries
+   *  neither an `embed` nor `sources`. */
   soon: { it: "Prossimamente", en: "Coming soon" } satisfies Copy,
   /** The button over an embedded film, and the line under it naming who it
    *  loads from ({p}) — nothing is fetched from there until it is pressed. */

@@ -173,27 +173,49 @@ export default async function ProjectPage({
 
         <div className="rule mt-[4svh] w-full" />
 
-        {/* The player. The frame is reserved by `video` being there at all; what
-            fills it may still be missing, in which case the frame says so
-            rather than standing empty. A clip of our own plays in a <video> on
-            a loop; a link plays in an <iframe> with the platform's own embed
-            URL, loaded only once the visitor presses play (see EmbedPlayer). */}
-        {project.video && (
-          <figure className="mt-[4svh] aspect-video w-full border border-bone/15 bg-ink">
-            {project.video.sources ? (
-              <LoopVideo
-                sources={project.video.sources}
-                className="h-full w-full object-cover"
-              />
-            ) : project.video.embed ? (
-              <EmbedPlayer embed={project.video.embed} title={project.title.it} />
-            ) : (
-              <div className="t-meta flex h-full w-full items-center justify-center text-bone/40">
-                <T c={OPERE.soon} />
-              </div>
-            )}
-          </figure>
-        )}
+        {/* The player. A clip of our own plays in a <video> on a loop; a link
+            plays in an <iframe> with the platform's own embed URL, loaded only
+            once the visitor presses play (see EmbedPlayer). A film announced
+            before either exists gets one line saying so, not the frame: an
+            empty 16:9 box the width of the page filled the whole first screen
+            and read as the end of the page, so nobody scrolled on to the text. */}
+        {project.video &&
+          (project.video.sources || project.video.embed ? (
+            <figure className="mt-[4svh] aspect-video w-full border border-bone/15 bg-ink">
+              {project.video.sources ? (
+                <LoopVideo
+                  sources={project.video.sources}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                project.video.embed && (
+                  <EmbedPlayer embed={project.video.embed} title={project.title.it} />
+                )
+              )}
+            </figure>
+          ) : (
+            <p className="t-meta mt-[4svh] inline-flex items-center gap-4 border border-bone/15 bg-ink py-3 pl-3 pr-6 text-bone/55">
+              {/* The player's own play mark, dimmed: a film, not yet here. */}
+              <span
+                aria-hidden
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-bone/25"
+              >
+                <svg viewBox="0 0 24 24" className="ml-0.5 h-3.5 w-3.5 fill-current">
+                  <path d="M7 4.5v15l12-7.5z" />
+                </svg>
+              </span>
+              {/* What, then when — two lines, so a phone never breaks them
+                  mid-phrase. */}
+              <span className="flex flex-col gap-1">
+                <span className="text-bone/40">
+                  <T c={project.meta} />
+                </span>
+                <span className="text-bone/75">
+                  <T c={OPERE.soon} />
+                </span>
+              </span>
+            </p>
+          ))}
 
         {/* The prose. With the work's own picture beside it — a poster — the
             text keeps a reading measure on the left and the picture takes the
