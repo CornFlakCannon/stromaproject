@@ -13,8 +13,28 @@ import {
   type AnimSpec,
   type Anchor,
   type BoxBase,
+  type Compiled,
   type Keyframe,
 } from "./anim";
+
+/** Strictly between the ends of a window: the element is on its way somewhere. The
+ *  smoother snaps its last step onto the exact target, so a finished move reads 0
+ *  or 1 exactly and this goes false. */
+const inFlight = (p: number) => p > 0 && p < 1;
+
+/** The `will-change` that puts this element on its own layer while it moves, from
+ *  the channels its layers animate: the transform family and opacity can be moved
+ *  by the compositor alone, so those are hinted; colour, rounding and blur repaint
+ *  whatever the hint says, so they add nothing. `null` when there is nothing a
+ *  layer would save. */
+function compositorHint(...layers: (Compiled | null)[]): string | null {
+  const on = (keys: (keyof Compiled)[]) => layers.some((c) => c && keys.some((k) => c[k]));
+  const hint = [
+    on(["x", "y", "scale", "rotate", "width", "height"]) && "transform",
+    on(["opacity"]) && "opacity",
+  ].filter(Boolean);
+  return hint.length ? hint.join(", ") : null;
+}
 
 /**
  * Sequence Div — a scroll-driven wrapper for any non-animation content. Give it
@@ -70,10 +90,25 @@ export default function SDiv({
   const compiledAnim = useMemo(() => compileAnim(anim), [anim]);
   const rawSpec = useMemo(() => (rawAnim ? compileRaw(rawAnim) : null), [rawAnim]);
   const compiledRaw = useMemo(() => (rawSpec ? compileAnim(rawSpec.spec) : null), [rawSpec]);
+  const layerHint = useMemo(
+    () => compositorHint(compiledAnim, compiledRaw),
+    [compiledAnim, compiledRaw],
+  );
+  // Whether the hint is on the element right now, so it is written on a change only.
+  const promoted = useRef(false);
 
   // Write the element's style from BOTH layers' current progress, resolving px
   // width/height against the measured base box. With a raw layer the two are merged
   // additively; without one this is exactly the single-layer path (units honored).
+  //
+  // Then the layer. A style written from script each frame does NOT get the element
+  // its own compositor layer — only CSS animations and `will-change` do — so every
+  // frame of a move re-rasters whatever layer the element is painted into: on a
+  // panel, a screen's worth of type and photographs, and for a `scale` the box's own
+  // pixels too, every frame. So the element is promoted while it MOVES and released
+  // once it rests: a resting layer is memory for nothing, and releasing it re-rasters
+  // the content once at its final size, sharp. A loop never rests — its phase
+  // touches 0 and 1 on every turn — so it stays promoted rather than flapping.
   const pose = () => {
     const el = ref.current;
     if (!el) return;
@@ -81,6 +116,13 @@ export default function SDiv({
       ? composeStyle(compiledAnim, pAnim.current, compiledRaw, pRaw.current, box.current)
       : styleAt(compiledAnim, pAnim.current, box.current);
     Object.assign(el.style, style);
+    if (!layerHint) return;
+    const moving =
+      !!loop || inFlight(pAnim.current) || (compiledRaw !== null && inFlight(pRaw.current));
+    if (moving !== promoted.current) {
+      promoted.current = moving;
+      el.style.willChange = moving ? layerHint : "";
+    }
   };
   // Keep the latest `pose` reachable from the []-effect below without resubscribing.
   const poseRef = useRef(pose);
