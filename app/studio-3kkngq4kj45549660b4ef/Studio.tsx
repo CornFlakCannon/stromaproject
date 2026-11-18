@@ -8,6 +8,7 @@ import {
   type Settings,
   type Studio as Engine,
 } from "./engine";
+import { withDateTaken } from "./exif";
 
 const INITIAL: Settings = {
   format: 0,
@@ -23,19 +24,23 @@ type Shot = { file: File; url: string };
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
-/** `stroma_post-4x5_20261117-143205_02-di-05.png`: the export's time keeps two
+/** `stroma_post-4x5_20261117-143205_02-di-05.jpg`: the export's time keeps two
  *  batches apart, and the slide number comes last so a folder sorted by name
  *  is the carousel in order. */
-function fileNames(st: Settings, n: number): string[] {
-  const d = new Date();
+function fileNames(st: Settings, n: number, d: Date): string[] {
   const stamp =
     `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-` +
     `${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
   const base = `stroma_${FORMATS[st.format].id}_${stamp}`;
   return Array.from({ length: n }, (_, i) =>
-    n === 1 ? `${base}.png` : `${base}_${pad2(i + 1)}-di-${pad2(n)}.png`,
+    n === 1 ? `${base}.jpg` : `${base}_${pad2(i + 1)}-di-${pad2(n)}.jpg`,
   );
 }
+
+/** When slide `i` of `n` was "taken": one second apart, the last one now, so a
+ *  gallery sorting by date files them in slide order (see exif.ts). */
+const takenAt = (now: Date, i: number, n: number) =>
+  new Date(now.getTime() - (n - 1 - i) * 1000);
 
 /**
  * The post studio: the site's background, posed by hand and saved at an
@@ -86,12 +91,20 @@ export default function Studio() {
       const blobs = await e.exportSlides((i, n) =>
         setBusy(n > 1 ? `Slide ${i + 1} di ${n}…` : "Esporto…"),
       );
-      const names = fileNames(s, blobs.length);
+      const now = new Date();
+      const n = blobs.length;
+      const names = fileNames(s, n, now);
       setShots(
-        blobs.map((b, i) => {
-          const file = new File([b], names[i], { type: "image/png" });
-          return { file, url: URL.createObjectURL(file) };
-        }),
+        await Promise.all(
+          blobs.map(async (b, i) => {
+            const taken = takenAt(now, i, n);
+            const file = new File([await withDateTaken(b, taken)], names[i], {
+              type: "image/jpeg",
+              lastModified: taken.getTime(),
+            });
+            return { file, url: URL.createObjectURL(file) };
+          }),
+        ),
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -106,8 +119,8 @@ export default function Studio() {
   };
 
   // The share sheet is the quick way into Instagram on a phone ("Salva
-  // immagini" puts them in the camera roll, in order); downloads keep the
-  // numbered names.
+  // immagini" puts them in the camera roll, filed in order by the date each
+  // one carries); downloads keep the numbered names.
   const files = shots?.map((x) => x.file) ?? [];
   const canShare =
     shots !== null && typeof navigator.canShare === "function" && navigator.canShare({ files });
@@ -123,7 +136,9 @@ export default function Studio() {
   };
 
   const downloadAll = () => {
-    // Spaced out: browsers drop a burst of downloads fired in one go.
+    // Spaced out: browsers drop a burst of downloads fired in one go. Over a
+    // second apart, so an app that files by the time a file was saved, not by
+    // the date inside it, still finds them in slide order.
     shots?.forEach((x, i) =>
       setTimeout(() => {
         const a = document.createElement("a");
@@ -132,7 +147,7 @@ export default function Studio() {
         document.body.appendChild(a);
         a.click();
         a.remove();
-      }, i * 400),
+      }, i * 1100),
     );
   };
 
@@ -273,7 +288,7 @@ export default function Studio() {
             onClick={run}
             className="w-full rounded-md bg-viola py-3 text-sm font-semibold uppercase tracking-wider disabled:opacity-60"
           >
-            {busy ?? (s.slides > 1 ? `Esporta ${s.slides} PNG` : "Esporta PNG")}
+            {busy ?? (s.slides > 1 ? `Esporta ${s.slides} immagini` : "Esporta immagine")}
           </button>
           {error && <p className="text-xs text-flesh">{error}</p>}
         </div>

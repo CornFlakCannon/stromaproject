@@ -399,8 +399,13 @@ export function createStudio(
             ctx.fillRect(0, 0, f.w, f.h);
             ctx.globalAlpha = 1;
           }
-          const blob = await new Promise<Blob | null>((r) => out.toBlob(r, "image/png"));
-          if (!blob) throw new Error("Impossibile creare il PNG");
+          // JPEG, so the slide can carry a date taken (see exif.ts). At 0.95 a
+          // 4× crop of the densest tissue is indistinguishable from the PNG; what
+          // little JPEG does lose is the colour detail Instagram's own JPEG drops.
+          const blob = await new Promise<Blob | null>((r) =>
+            out.toBlob(r, "image/jpeg", 0.95),
+          );
+          if (!blob) throw new Error("Impossibile creare l'immagine");
           blobs.push(blob);
         }
       } finally {
