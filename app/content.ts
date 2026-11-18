@@ -423,13 +423,15 @@ export const OPERE = {
           author: "Alexandra Frabetti, Mattia Dagli Orti",
           meta: { it: "Cortometraggio", en: "Short film" },
           /* The poster, reduced from the 4320×7680 master (kept outside the
-             repo) to a web size: next/image cuts the srcset from this. The
+             repo) to a web size: 1200 wide covers the grid card on a large
+             phone, the widest it is ever drawn. Quality 80, not the site's
+             92: its hairlines are near-noise and would cost 650 KB at 92. The
              grid card shows its foot: the title sits mid-poster and a centred
              crop cut through the lettering. */
           cover: {
             src: "/media/vertigine-locandina.webp",
-            width: 1600,
-            height: 2844,
+            width: 1200,
+            height: 2133,
             position: "50% 100%",
           },
           body: [
