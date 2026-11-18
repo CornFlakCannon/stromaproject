@@ -15,8 +15,8 @@ import type { Founder } from "@/app/content";
  *
  * The placeholder is not a fallback for a failed load: `photo` being absent is
  * the signal. next/image pointed at a file that isn't there 404s and leaves a
- * broken box, so the missing case never reaches the network at all. All three
- * founders have their photograph; the branch stays for the fourth.
+ * broken box, so the missing case never reaches the network at all — a new
+ * face can join before their photograph does.
  */
 export default function FounderPortrait({
   person,

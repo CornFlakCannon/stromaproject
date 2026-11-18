@@ -90,12 +90,11 @@ export const MANIFESTO_PAGE = {
 /**
  * A founder. `name` is deliberately not bilingual — a name is a name.
  *
- * All three photographs exist, and `photo` stays optional anyway: a fourth name
- * can arrive before their portrait does without next/image 404ing on a file
- * that isn't there and leaving a broken box. Until the field is filled, the
- * card draws that founder's initial instead. Dropping the file into
- * public/people/ and filling this in is the whole handover — no component
- * changes. Portrait 3:4, at least 900×1200, EXIF rotation baked into the pixels
+ * `photo` is optional: a new name can arrive before their portrait does,
+ * without next/image 404ing on a file that isn't there and leaving a broken
+ * box. Until the field is filled, the card draws that founder's initial
+ * instead. Dropping the file into public/people/ and filling this in is the
+ * whole handover — no component changes, ChiSiamo lays out any count. Portrait 3:4, at least 900×1200, EXIF rotation baked into the pixels
  * and the metadata stripped. Nothing recolours it downstream, so framing and
  * light are on the photograph.
  */
@@ -106,7 +105,8 @@ export type Founder = {
   role: Copy;
   photo?: { src: string; width: number; height: number };
   bio: Copy;
-  /** Three to five lines. Not a CV — the parts of one that matter here. */
+  /** A few lines. Not a CV — the parts of one that matter here. May be empty
+   *  while it is being written: the card then leaves out the whole block. */
   cv: Copy[];
 };
 
@@ -161,26 +161,19 @@ export const CHI_SIAMO = {
         },
       ],
     },
-    /* Ted è fuori dalla lista per ora — da riaggiungere dopo una data futura,
-       scommentando e rimettendo la foto in public/people/ted.jpg (tolta perché
-       tutto ciò che sta in public/ viene pubblicato; è nella storia del repo
-       privato d'archivio). La griglia di ChiSiamo conta le colonne da sola. */
-    // {
-    //   id: "ted",
-    //   name: "Ted Alushani",
-    //   role: { it: "Fondatore", en: "Founder" },
-    //   photo: { src: "/people/ted.jpg", width: 1200, height: 1600 },
-    //   bio: {
-    //     it: "Chi non crede alle storie non piange.",
-    //     en: "Those who do not believe in stories do not cry.",
-    //   },
-    //   cv: [
-    //     { it: "TODO — formazione", en: "TODO — education" },
-    //     { it: "TODO — esperienza principale", en: "TODO — main experience" },
-    //     { it: "TODO — un lavoro di cui va fiero", en: "TODO — one work they are proud of" },
-    //     { it: "TODO — che cosa porta al gruppo", en: "TODO — what they bring to the group" },
-    //   ],
-    // },
+    {
+      id: "ted",
+      name: "Ted Alushani",
+      role: { it: "Fondatore", en: "Founder" },
+      photo: { src: "/people/ted.jpg", width: 1200, height: 1600 },
+      bio: {
+        it: "Chi non crede alle storie non piange.",
+        en: "Those who do not believe in stories do not cry.",
+      },
+      /* TODO — il percorso di Ted: formazione, esperienza, che cosa porta al
+         gruppo. Finché è vuoto la scheda mostra solo la bio. */
+      cv: [],
+    },
   ] satisfies Founder[],
   close: { it: "Chiudi", en: "Close" } satisfies Copy,
   percorso: { it: "Percorso", en: "Path" } satisfies Copy,

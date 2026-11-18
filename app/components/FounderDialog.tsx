@@ -23,7 +23,7 @@ export type FounderDialogHandle = { open: (f: Founder) => void };
  * The open state lives HERE rather than in ChiSiamo, and that is the whole
  * reason this is a separate component with an imperative handle: SDiv re-applies
  * its p=0 pose on every render (scrollkit/widgets/SDiv.tsx), so a useState up in
- * ChiSiamo would snap all three cards back to their entry pose for a frame each
+ * ChiSiamo would snap every card back to its entry pose for a frame each
  * time one of them was opened.
  */
 export default function FounderDialog({ ref }: { ref?: Ref<FounderDialogHandle> }) {
@@ -64,8 +64,8 @@ export default function FounderDialog({ ref }: { ref?: Ref<FounderDialogHandle> 
            aspect-[2/1] is the rule, not a proportion someone liked. With the
            left column at 0.75 of 2fr — 0.375·W — a panel half as tall as it is
            wide makes that column 0.375W by 0.5W, which is 3:4 exactly, at every
-           width. The photograph is therefore the same rectangle for all three
-           founders and never has to be trimmed twice.
+           width. The photograph is therefore the same rectangle for every
+           founder and never has to be trimmed twice.
 
            grid-rows-[minmax(0,1fr)] is what holds it: an auto row would size
            itself to whichever column has more text, and the panel would grow
@@ -110,20 +110,26 @@ export default function FounderDialog({ ref }: { ref?: Ref<FounderDialogHandle> 
               <T c={who.bio} />
             </p>
 
-            <div className="rule mt-[1svh] w-full" />
+            {/* A path still being written is left out whole — a "Percorso"
+                heading over nothing reads as a fault, not as a pause. */}
+            {who.cv.length > 0 && (
+              <>
+                <div className="rule mt-[1svh] w-full" />
 
-            <div className="flex flex-col gap-[1.2svh]">
-              <p className="t-meta text-bone/55">
-                <T c={CHI_SIAMO.percorso} />
-              </p>
-              <ul className="flex flex-col gap-[0.8svh]">
-                {who.cv.map((line) => (
-                  <li key={line.it} className="t-voice text-[4vw] text-bone/70 md:text-[1.25vw]">
-                    <T c={line} />
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <div className="flex flex-col gap-[1.2svh]">
+                  <p className="t-meta text-bone/55">
+                    <T c={CHI_SIAMO.percorso} />
+                  </p>
+                  <ul className="flex flex-col gap-[0.8svh]">
+                    {who.cv.map((line) => (
+                      <li key={line.it} className="t-voice text-[4vw] text-bone/70 md:text-[1.25vw]">
+                        <T c={line} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
