@@ -164,7 +164,7 @@ export const CHI_SIAMO = {
     {
       id: "ted",
       name: "Ted Alushani",
-      role: { it: "Fondatore", en: "Founder" },
+      role: { it: "Membro", en: "Member" },
       photo: { src: "/people/ted.jpg", width: 1200, height: 1600 },
       bio: {
         it: "Chi non crede alle storie non piange.",
@@ -173,6 +173,26 @@ export const CHI_SIAMO = {
       /* TODO — il percorso di Ted: formazione, esperienza, che cosa porta al
          gruppo. Finché è vuoto la scheda mostra solo la bio. */
       cv: [],
+    },
+    {
+      id: "giulio",
+      name: "Giulio Tellina",
+      role: { it: "Membro", en: "Member" },
+      photo: { src: "/people/giulio.jpg", width: 1200, height: 1600 },
+      bio: {
+        it: "Arte e natura sono i più grandi laboratori di sperimentazione che abbia mai conosciuto.",
+        en: "Art and nature are the greatest laboratories of experimentation I have ever known.",
+      },
+      cv: [
+        {
+          it: "La passione per la biologia e l'ecologia mi ha reso uno scienziato; il desiderio di decifrarne la complessità mi ha reso un artista.",
+          en: "My passion for biology and ecology made me a scientist; the wish to decipher their complexity made me an artist.",
+        },
+        {
+          it: "Trasformo dati e conoscenze scientifiche in installazioni ed esperienze artistiche.",
+          en: "I turn scientific data and knowledge into installations and artistic experiences.",
+        },
+      ],
     },
   ] satisfies Founder[],
   close: { it: "Chiudi", en: "Close" } satisfies Copy,
